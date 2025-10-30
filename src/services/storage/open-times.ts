@@ -1,4 +1,4 @@
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 
 export async function getAppOpenTimes() {
   const { openTimes = 0 } = await Browser.storage.sync.get('openTimes')

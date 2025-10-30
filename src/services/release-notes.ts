@@ -1,5 +1,5 @@
 import { compareVersions } from 'compare-versions'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { getVersion } from '~utils'
 
 const RELEASE_NOTES = [

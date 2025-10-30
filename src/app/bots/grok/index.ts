@@ -1,5 +1,5 @@
 import { FetchError, ofetch } from 'ofetch'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { requestHostPermission } from '~app/utils/permissions'
 import { ChatError, ErrorCode } from '~utils/errors'
 import { streamAsyncIterable } from '~utils/stream-async-iterable'

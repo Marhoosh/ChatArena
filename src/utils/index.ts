@@ -1,14 +1,19 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { v4 } from 'uuid'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 
 export function uuid() {
   return v4()
 }
 
 export function getVersion() {
-  return Browser.runtime.getManifest().version
+  try {
+    return Browser.runtime.getManifest().version
+  } catch (e) {
+    // Fallback for non-extension environment
+    return '1.0.0'
+  }
 }
 
 export function isProduction() {

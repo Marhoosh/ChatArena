@@ -1,4 +1,4 @@
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 
 export async function getTokenUsage() {
   const { tokenUsage } = await Browser.storage.sync.get('tokenUsage')

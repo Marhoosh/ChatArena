@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import { useTranslation } from 'react-i18next'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import premiumIcon from '~/assets/icons/premium.svg'
 import Button from './components/Button'
 import { usePremium } from './hooks/use-premium'
@@ -16,7 +16,9 @@ function PremiumOnly() {
 
   const openPremiumPage = useCallback(() => {
     trackEvent('open_premium_from_sidepanel')
-    window.open(Browser.runtime.getURL('app.html#/premium?source=sidepanel'), '_blank')
+    // In web environment, use direct URL instead of Browser.runtime.getURL
+    const premiumUrl = window.location.origin + '/#/premium?source=sidepanel'
+    window.open(premiumUrl, '_blank')
   }, [])
 
   return (

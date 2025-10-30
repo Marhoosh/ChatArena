@@ -1,4 +1,7 @@
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
+
+// Check if we're in a Chrome extension environment
+const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
 
 class ArkoseTokenGenerator {
   constructor() {
@@ -38,7 +41,13 @@ class ArkoseTokenGenerator {
 
   injectScript() {
     const script = document.createElement('script')
-    script.src = Browser.runtime.getURL('/js/v2/35536E1E-65B4-4D96-9D97-6ADB7EFF8147/api.js')
+    // Use different script source based on environment
+    if (isChromeExtension) {
+      script.src = Browser.runtime.getURL('/js/v2/35536E1E-65B4-4D96-9D97-6ADB7EFF8147/api.js')
+    } else {
+      // In web environment, use a public CDN or fallback
+      script.src = 'https://client.arkoselabs.com/v2/35536E1E-65B4-4D96-9D97-6ADB7EFF8147/api.js'
+    }
     script.async = true
     script.defer = true
     script.setAttribute('data-callback', 'useArkoseSetupEnforcement')

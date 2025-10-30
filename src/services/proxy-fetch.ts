@@ -1,4 +1,4 @@
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import {
   ProxyFetchRequestMessage,
   ProxyFetchResponseBodyChunkMessage,
@@ -11,7 +11,7 @@ import { streamAsyncIterable } from '~utils/stream-async-iterable'
 
 export function setupProxyExecutor() {
   // one port for one fetch request
-  Browser.runtime.onConnect.addListener((port) => {
+  Browser.runtime.onConnect.addListener((port: any) => {
     const abortController = new AbortController()
     port.onDisconnect.addListener(() => {
       abortController.abort()

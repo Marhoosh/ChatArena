@@ -1,10 +1,8 @@
-import { crx } from '@crxjs/vite-plugin'
 import react from '@vitejs/plugin-react'
 import jotaiDebugLabel from 'jotai/babel/plugin-debug-label'
 import jotaiReactRefresh from 'jotai/babel/plugin-react-refresh'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import manifest from './manifest.config'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -15,21 +13,22 @@ export default defineConfig(({ mode }) => {
           plugins: [jotaiDebugLabel, jotaiReactRefresh],
         },
       }),
-      crx({ manifest }),
     ],
     build: {
       rollupOptions: {
-        input: ['app.html'],
+        input: 'index.html',
+        external: ['webextension-polyfill'],
       },
+      outDir: 'dist',
     },
     esbuild: {
       drop: mode === 'production' ? ['console', 'debugger'] : [],
     },
     server: {
       strictPort: true,
-      port: 5173,
+      port: 5174,
       hmr: {
-        clientPort: 5173,
+        clientPort: 5174,
       },
     },
   }

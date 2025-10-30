@@ -1,6 +1,6 @@
 import { FC, useCallback, useContext, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { chatGPTClient } from '~app/bots/chatgpt-webapp/client'
 import { ConversationContext } from '~app/context'
 import { ChatError, ErrorCode } from '~utils/errors'

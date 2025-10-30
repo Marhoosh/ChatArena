@@ -1,6 +1,6 @@
 import i18next from 'i18next'
 import { ofetch } from 'ofetch'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 
 export interface Prompt {
   id: string

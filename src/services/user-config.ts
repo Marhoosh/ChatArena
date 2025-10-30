@@ -1,5 +1,5 @@
 import { defaults } from 'lodash-es'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { BotId } from '~app/bots'
 import { ALL_IN_ONE_PAGE_ID, CHATBOTS, CHATGPT_API_MODELS, DEFAULT_CHATGPT_SYSTEM_MESSAGE } from '~app/consts'
 

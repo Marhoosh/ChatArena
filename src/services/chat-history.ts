@@ -1,5 +1,5 @@
 import { zip } from 'lodash-es'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { BotId } from '~app/bots'
 import { ChatMessageModel } from '~types'
 

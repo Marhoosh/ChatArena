@@ -1,5 +1,8 @@
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { setupProxyExecutor } from '~services/proxy-fetch'
+
+// Check if we're in a Chrome extension environment
+const isChromeExtension = typeof window !== 'undefined' && (window as any).chrome && (window as any).chrome.runtime && (window as any).chrome.runtime.id
 
 function injectTip() {
   const div = document.createElement('div')
@@ -17,14 +20,17 @@ function injectTip() {
 }
 
 async function main() {
-  Browser.runtime.onMessage.addListener(async (message) => {
-    if (message === 'url') {
-      return location.href
-    }
-  })
-  if ((window as any).__NEXT_DATA__) {
-    if (await Browser.runtime.sendMessage({ event: 'PROXY_TAB_READY' })) {
-      injectTip()
+  // Only add event listeners in Chrome extension environment
+  if (isChromeExtension) {
+    Browser.runtime.onMessage.addListener(async (message: any) => {
+      if (message === 'url') {
+        return location.href
+      }
+    })
+    if ((window as any).__NEXT_DATA__) {
+      if (await Browser.runtime.sendMessage({ event: 'PROXY_TAB_READY' })) {
+        injectTip()
+      }
     }
   }
 }

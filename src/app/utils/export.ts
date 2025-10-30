@@ -1,5 +1,5 @@
 import { fileOpen, fileSave } from 'browser-fs-access'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { trackEvent } from '~app/plausible'
 
 export async function exportData() {

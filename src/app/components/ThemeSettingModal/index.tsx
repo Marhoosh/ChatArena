@@ -4,7 +4,7 @@ import { useAtom } from 'jotai'
 import { ComponentPropsWithoutRef, FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { ColorResult, TwitterPicker } from 'react-color'
 import { useTranslation } from 'react-i18next'
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import { usePremium } from '~app/hooks/use-premium'
 import { trackEvent } from '~app/plausible'
 import { followArcThemeAtom, themeColorAtom } from '~app/state'
@@ -73,7 +73,15 @@ const ThemeSettingModal: FC<Props> = (props) => {
   }, [])
 
   useEffect(() => {
-    Browser.tabs.getZoom().then((zoom) => setZoomLevel(zoom))
+    // Check if we're in a Chrome extension environment
+    const isChromeExtension = typeof window !== 'undefined' && (window as any).chrome && (window as any).chrome.runtime && (window as any).chrome.runtime.id
+    
+    if (isChromeExtension) {
+      Browser.tabs.getZoom().then((zoom: any) => setZoomLevel(zoom))
+    } else {
+      // In web environment, use default zoom level
+      setZoomLevel(1.0)
+    }
   }, [])
 
   const updateZoomLevel = useCallback(
@@ -85,7 +93,17 @@ const ThemeSettingModal: FC<Props> = (props) => {
       if (newZoom < 0.7 || newZoom > 1.2) {
         return
       }
-      Browser.tabs.setZoom(newZoom)
+      
+      // Check if we're in a Chrome extension environment
+      const isChromeExtension = typeof window !== 'undefined' && (window as any).chrome && (window as any).chrome.runtime && (window as any).chrome.runtime.id
+      
+      if (isChromeExtension) {
+        Browser.tabs.setZoom(newZoom)
+      } else {
+        // In web environment, apply zoom to the document body
+        document.body.style.zoom = newZoom.toString()
+      }
+      
       setZoomLevel(newZoom)
       trackEvent('change_zoom_level', { zoom: newZoom })
     },

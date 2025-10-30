@@ -2,12 +2,21 @@
  * How it works: pass message via storage.session
  */
 
-import Browser from 'webextension-polyfill'
+import Browser from '~services/extension-polyfill'
 import Cookie from 'cookie'
 
 const storageKey = 'twitter-csrf-token'
 
+// Check if we're in a Chrome extension environment
+const isChromeExtension = typeof window !== 'undefined' && (window as any).chrome && (window as any).chrome.runtime && (window as any).chrome.runtime.id
+
 async function readTwitterCsrfToken({ refresh }: { refresh?: boolean } = {}) {
+  // In web environment, we can't access Twitter cookies directly
+  if (!isChromeExtension) {
+    console.warn('Twitter CSRF token reading is not available in web environment')
+    return ''
+  }
+
   if (!refresh) {
     const { [storageKey]: token } = await Browser.storage.session.get(storageKey)
     if (token) {
