@@ -105,7 +105,6 @@
     "turndown": "^7.1.2",
     "unified": "^10.1.2",
     "uuid": "^9.0.1",
-    "webextension-polyfill": "^0.12.0",
     "websocket-as-promised": "^2.0.1"
   },
   "packageManager": "yarn@4.0.1"
