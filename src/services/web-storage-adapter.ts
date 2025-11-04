@@ -198,7 +198,7 @@ class WebSessionStorageAdapter {
 
 // Runtime adapter for Chrome extension runtime API
 class WebRuntimeAdapter {
-  async getURL(path: string): Promise<string> {
+  getURL(path: string): string {
     // In a web app, we just return the path as is
     return path
   }
@@ -215,6 +215,10 @@ class WebRuntimeAdapter {
       // In a web app, we don't have a background script
       // This would need to be implemented based on specific needs
       console.warn('onMessage.addListener called in web app context')
+    },
+    removeListener: (listener: any) => {
+      // In a web app, we don't have a background script
+      console.warn('onMessage.removeListener called in web app context')
     }
   }
 
@@ -222,6 +226,20 @@ class WebRuntimeAdapter {
     addListener: (callback: (details: any) => void) => {
       // In a web app, we don't have installation events
       console.warn('onInstalled.addListener called in web app context')
+    }
+  }
+
+  onConnect = {
+    addListener: (callback: (port: any) => void) => {
+      // In a web app, we don't have extension connections
+      console.warn('onConnect.addListener called in web app context')
+    }
+  }
+
+  getManifest(): any {
+    // Return a mock manifest for web app
+    return {
+      version: '1.0.0'
     }
   }
 }
@@ -253,6 +271,46 @@ class WebTabsAdapter {
     }
     return { id: Date.now(), url: createProperties.url }
   }
+
+  async reload(tabId: number): Promise<void> {
+    // In a web app, we just reload the current page
+    window.location.reload()
+  }
+
+  async getZoom(): Promise<number> {
+    // In a web app, return default zoom level
+    return 1.0
+  }
+
+  async setZoom(zoomFactor: number): Promise<void> {
+    // In a web app, we can't set zoom
+    console.warn('tabs.setZoom called in web app context:', zoomFactor)
+  }
+
+  async sendMessage(tabId: number, message: any): Promise<any> {
+    // In a web app, we don't have tab messaging
+    console.warn('tabs.sendMessage called in web app context:', message)
+    return undefined
+  }
+
+  connect(tabId: number, connectInfo: any): any {
+    // In a web app, we don't have tab connections
+    console.warn('tabs.connect called in web app context')
+    return {
+      name: connectInfo.name || '',
+      postMessage: (message: any) => {
+        console.warn('Port.postMessage called in web app context:', message)
+      },
+      onMessage: {
+        addListener: (callback: (message: any) => void) => {
+          console.warn('Port.onMessage.addListener called in web app context')
+        }
+      },
+      disconnect: () => {
+        console.warn('Port.disconnect called in web app context')
+      }
+    }
+  }
 }
 
 // Action adapter for Chrome extension action API
@@ -273,6 +331,27 @@ class WebCommandsAdapter {
       console.warn('onCommand.addListener called in web app context')
     }
   }
+
+  async getAll(): Promise<any[]> {
+    // In a web app, we don't have extension commands
+    console.warn('commands.getAll called in web app context')
+    return []
+  }
+}
+
+// Permissions adapter for Chrome extension permissions API
+class WebPermissionsAdapter {
+  async contains(permissions: any): Promise<boolean> {
+    // In a web app, we don't have extension permissions
+    console.warn('permissions.contains called in web app context:', permissions)
+    return false
+  }
+
+  async request(permissions: any): Promise<boolean> {
+    // In a web app, we don't have extension permissions
+    console.warn('permissions.request called in web app context:', permissions)
+    return false
+  }
 }
 
 // Create the web extension polyfill
@@ -285,7 +364,8 @@ const webExtensionPolyfill = {
   runtime: new WebRuntimeAdapter(),
   tabs: new WebTabsAdapter(),
   action: new WebActionAdapter(),
-  commands: new WebCommandsAdapter()
+  commands: new WebCommandsAdapter(),
+  permissions: new WebPermissionsAdapter()
 }
 
 export default webExtensionPolyfill
