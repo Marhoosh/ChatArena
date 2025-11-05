@@ -45,6 +45,11 @@ export enum ClaudeAPIModel {
   'claude-instant-1' = 'claude-instant-v1',
 }
 
+export enum DeepSeekAPIModel {
+  'deepseek-chat' = 'deepseek-chat',
+  'deepseek-reasoner' = 'deepseek-reasoner',
+}
+
 export enum OpenRouterClaudeModel {
   'claude-2' = 'claude-2',
   'claude-instant-v1' = 'claude-instant-v1',
@@ -82,6 +87,8 @@ const userConfigWithDefaultValue = {
   perplexityMode: PerplexityMode.Webapp,
   perplexityApiKey: '',
   geminiApiKey: '',
+  deepseekApiKey: '',
+  deepseekApiModel: DeepSeekAPIModel['deepseek-chat'],
 }
 
 export type UserConfig = typeof userConfigWithDefaultValue

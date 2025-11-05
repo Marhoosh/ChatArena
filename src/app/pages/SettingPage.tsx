@@ -17,6 +17,7 @@ import ClaudeAPISettings from '~app/components/Settings/ClaudeAPISettings'
 import ClaudeOpenRouterSettings from '~app/components/Settings/ClaudeOpenRouterSettings'
 import ClaudePoeSettings from '~app/components/Settings/ClaudePoeSettings'
 import ClaudeWebappSettings from '~app/components/Settings/ClaudeWebappSettings'
+import DeepSeekAPISettings from '~app/components/Settings/DeepSeekAPISettings'
 import EnabledBotsSettings from '~app/components/Settings/EnabledBotsSettings'
 import ExportDataPanel from '~app/components/Settings/ExportDataPanel'
 import PerplexityAPISettings from '~app/components/Settings/PerplexityAPISettings'
@@ -146,6 +147,9 @@ function SettingPage() {
             ) : (
               <ClaudePoeSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
             )}
+          </ChatBotSettingPanel>
+          <ChatBotSettingPanel title="DeepSeek">
+            <DeepSeekAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           </ChatBotSettingPanel>
           <ChatBotSettingPanel title="Gemini Pro">
             <div className="flex flex-col gap-1">
