@@ -26,9 +26,9 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       strictPort: true,
-      port: 5174,
+      port: 5273,
       hmr: {
-        clientPort: 5174,
+        clientPort: 5273,
       },
     },
   }

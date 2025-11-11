@@ -18,6 +18,7 @@ import ClaudeOpenRouterSettings from '~app/components/Settings/ClaudeOpenRouterS
 import ClaudePoeSettings from '~app/components/Settings/ClaudePoeSettings'
 import ClaudeWebappSettings from '~app/components/Settings/ClaudeWebappSettings'
 import DeepSeekAPISettings from '~app/components/Settings/DeepSeekAPISettings'
+import DeepSeekOpenRouterSettings from '~app/components/Settings/DeepSeekOpenRouterSettings'
 import EnabledBotsSettings from '~app/components/Settings/EnabledBotsSettings'
 import ExportDataPanel from '~app/components/Settings/ExportDataPanel'
 import PerplexityAPISettings from '~app/components/Settings/PerplexityAPISettings'
@@ -27,6 +28,7 @@ import {
   BingConversationStyle,
   ChatGPTMode,
   ClaudeMode,
+  DeepSeekMode,
   PerplexityMode,
   UserConfig,
   getUserConfig,
@@ -149,7 +151,16 @@ function SettingPage() {
             )}
           </ChatBotSettingPanel>
           <ChatBotSettingPanel title="DeepSeek">
-            <DeepSeekAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
+            <RadioGroup
+              options={Object.entries(DeepSeekMode).map(([k, v]) => ({ label: `${k} ${t('Mode')}`, value: v }))}
+              value={userConfig.deepseekMode}
+              onChange={(v) => updateConfigValue({ deepseekMode: v as DeepSeekMode })}
+            />
+            {userConfig.deepseekMode === DeepSeekMode.API ? (
+              <DeepSeekAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
+            ) : (
+              <DeepSeekOpenRouterSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
+            )}
           </ChatBotSettingPanel>
           <ChatBotSettingPanel title="Gemini Pro">
             <div className="flex flex-col gap-1">
