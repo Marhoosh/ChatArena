@@ -53,6 +53,7 @@ export enum DeepSeekAPIModel {
 export enum OpenRouterDeepSeekModel {
   'deepseek-chat' = 'deepseek-chat',
   'deepseek-reasoner' = 'deepseek-reasoner',
+  'deepseek-chat-v3-0324' = 'deepseek-chat-v3-0324',
 }
 
 export enum DeepSeekMode {
@@ -61,8 +62,8 @@ export enum DeepSeekMode {
 }
 
 export enum OpenRouterClaudeModel {
-  'claude-2' = 'claude-2',
-  'claude-instant-v1' = 'claude-instant-v1',
+  'claude-3-7-sonnet' = 'claude-3-7-sonnet',
+  'claude-sonnet-4' = 'anthropic/claude-sonnet-4',
 }
 
 export enum PerplexityMode {
@@ -92,7 +93,7 @@ const userConfigWithDefaultValue = {
   chatgptWebAccess: false,
   claudeWebAccess: false,
   openrouterOpenAIModel: CHATGPT_API_MODELS[0] as (typeof CHATGPT_API_MODELS)[number],
-  openrouterClaudeModel: OpenRouterClaudeModel['claude-2'],
+  openrouterClaudeModel: OpenRouterClaudeModel['claude-3-7-sonnet'],
   openrouterDeepSeekModel: OpenRouterDeepSeekModel['deepseek-chat'],
   openrouterApiKey: '',
   perplexityMode: PerplexityMode.Webapp,

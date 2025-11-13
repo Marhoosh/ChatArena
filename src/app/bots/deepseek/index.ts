@@ -13,10 +13,8 @@ export class DeepSeekBot extends AsyncAbstractBot {
       if (!config.openrouterApiKey) {
         throw new ChatError('OpenRouter API key not set', ErrorCode.API_KEY_NOT_SET)
       }
-      return new OpenRouterBot({ 
-        apiKey: config.openrouterApiKey, 
-        model: config.openrouterDeepSeekModel 
-      })
+      const model = `deepseek/${config.openrouterDeepSeekModel}`
+      return new OpenRouterBot({ apiKey: config.openrouterApiKey, model })
     }
     
     // Default to API mode
