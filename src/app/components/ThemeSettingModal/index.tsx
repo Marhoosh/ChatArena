@@ -155,56 +155,7 @@ const ThemeSettingModal: FC<Props> = (props) => {
             onChange={onThemeModeChange}
           />
         </div>
-        <div>
-          <p className="font-bold text-lg mb-3">
-            {t('Theme Color')}{' '}
-            {!premiumState.activated && (
-              <Link
-                to="/premium"
-                search={{ source: 'theme' }}
-                className="text-sm font-normal ml-1 underline italic"
-                onClick={() => props.onClose()}
-              >
-                ({t('Premium Feature')})
-              </Link>
-            )}
-          </p>
-          <div className={cx('flex flex-col gap-3', !premiumState.activated && 'opacity-50 pointer-events-none')}>
-            {isArcBrowser() && (
-              <div className="flex flex-row items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="arc-theme-check"
-                  checked={followArcTheme}
-                  onChange={(e) => setFollowArcTheme(e.target.checked)}
-                  disabled={!premiumState.activated}
-                />
-                <label htmlFor="arc-theme-check">{t('Follow Arc browser theme')}</label>
-              </div>
-            )}
-            {!followArcTheme && (
-              <TwitterPicker
-                colors={THEME_COLORS}
-                color={themeColor}
-                onChange={onThemeColorChange}
-                triangle="hide"
-                width="300px"
-              />
-            )}
-          </div>
-        </div>
-        <div>
-          <p className="font-bold text-lg mb-3">{t('Display size')}</p>
-          <span className="isolate inline-flex rounded-md shadow-sm">
-            <Button className="rounded-l-md" onClick={() => updateZoomLevel('-')}>
-              -
-            </Button>
-            <Button className="-ml-px cursor-default">{zoomLevel === null ? '-' : Math.floor(zoomLevel * 100)}%</Button>
-            <Button className="-ml-px rounded-r-md" onClick={() => updateZoomLevel('+')}>
-              +
-            </Button>
-          </span>
-        </div>
+
         <div className="w-[300px]">
           <p className="font-bold text-lg mb-3">{t('Language')}</p>
           <Select
