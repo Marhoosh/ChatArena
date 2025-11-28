@@ -59,6 +59,8 @@
     "cookie": "^0.6.0",
     "dayjs": "^1.11.10",
     "eventsource-parser": "^1.1.1",
+    "firebase": "^12.6.0",
+    "firebaseui": "^6.1.0",
     "framer-motion": "^10.16.16",
     "fuse.js": "^7.0.0",
     "github-markdown-css": "^5.5.0",

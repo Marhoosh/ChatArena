@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import MultiBotChatPanel from './pages/MultiBotChatPanel'
 import PremiumPage from './pages/PremiumPage'
 import SettingPage from './pages/SettingPage'
+import TestPage from './pages/TestPage'
 import SingleBotChatPanel from './pages/SingleBotChatPanel'
 
 const rootRoute = createRootRoute()
@@ -35,6 +36,12 @@ const settingRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: 'setting',
   component: SettingPage,
+})
+
+const testRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: 'test',
+  component: TestPage,
 })
 
 export const premiumRoute = createRoute({
