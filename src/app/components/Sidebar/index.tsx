@@ -18,7 +18,7 @@ import { getPremiumActivation } from '~services/premium'
 import { checkReleaseNotes } from '~services/release-notes'
 import * as api from '~services/server-api'
 import { getAppOpenTimes, getPremiumModalOpenTimes } from '~services/storage/open-times'
-import GuideModal from '../GuideModal'
+// import GuideModal from '../GuideModal'
 import ThemeSettingModal from '../ThemeSettingModal'
 import Tooltip from '../Tooltip'
 import NavLink from './NavLink'
@@ -109,7 +109,8 @@ function Sidebar() {
     
         </div>
       </div>
-      <GuideModal />
+      {/* TODO: 实现用户好评引导弹窗 */}
+      {/* <GuideModal /> */}
       <ThemeSettingModal open={themeSettingModalOpen} onClose={() => setThemeSettingModalOpen(false)} />
     </motion.aside>
   )
