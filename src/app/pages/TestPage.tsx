@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
+// 扩展 Window 接口以包含我们的自定义属性
+declare global {
+  interface Window {
+    handleSignInWithGoogle: (response: any) => Promise<void>;
+    google: any;
+  }
+}
+
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
 // 将Google登录处理函数添加到全局作用域
@@ -9,28 +17,52 @@ window.handleSignInWithGoogle = async function(response) {
         provider: 'google',
         token: response.credential,
     });
-    
-    if (error) {
-        console.error('Google登录失败:', error);
-        alert('登录失败: ' + error.message);
-    } else {
-        console.log('Google登录成功:', data);
-    }
+
 };
 
 // 动态加载Google Sign-In脚本
 const loadGoogleScript = () => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
         const existingScript = document.getElementById('google-signin-script');
         if (!existingScript) {
             const script = document.createElement('script');
             script.id = 'google-signin-script';
             script.src = 'https://accounts.google.com/gsi/client';
             script.async = true;
-            script.onload = resolve;
+            script.onload = () => resolve();
             document.body.appendChild(script);
         } else {
             resolve();
+        }
+    });
+};
+
+// 初始化Google登录按钮
+const initializeGoogleSignIn = () => {
+    return loadGoogleScript().then(() => {
+        // 确保Google库已加载
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+            // 重新初始化Google登录
+            window.google.accounts.id.initialize({
+                client_id: "280072408180-88habribp82fhbdpt10p7806r1a6j110.apps.googleusercontent.com",
+                callback: window.handleSignInWithGoogle,
+                context: "signin",
+                ux_mode: "popup",
+                auto_prompt: "false"
+            });
+            
+            // 渲染登录按钮
+            window.google.accounts.id.renderButton(
+                document.getElementById("google-signin-button"),
+                {
+                    type: "standard",
+                    shape: "rectangular",
+                    theme: "outline",
+                    text: "continue_with",
+                    size: "large",
+                    logo_alignment: "left"
+                }
+            );
         }
     });
 };
@@ -49,10 +81,8 @@ export default function TestPage() {
     const [authSuccess, setAuthSuccess] = useState(false);
 
     useEffect(() => {
-        // 加载Google Sign-In脚本
-        loadGoogleScript().then(() => {
-            console.log('Google Sign-In script loaded');
-        });
+
+        initializeGoogleSignIn();
 
         // Check if we have token_hash in URL (magic link callback)
         const params = new URLSearchParams(window.location.search);
@@ -84,12 +114,16 @@ export default function TestPage() {
         // Listen for auth changes
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session);
         });
 
         return () => subscription.unsubscribe();
     }, []);
+
+    useEffect(() => {
+        initializeGoogleSignIn();
+    },[session]);
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -185,23 +219,7 @@ export default function TestPage() {
                 </button>
             </form>
 
-
-            <div id="g_id_onload"
-                data-client_id="280072408180-88habribp82fhbdpt10p7806r1a6j110.apps.googleusercontent.com"
-                data-context="signin"
-                data-ux_mode="popup"
-                data-callback="handleSignInWithGoogle"
-                data-auto_prompt="false">
-            </div>
-
-            <div class="g_id_signin"
-                data-type="standard"
-                data-shape="rectangular"
-                data-theme="outline"
-                data-text="continue_with"
-                data-size="large"
-                data-logo_alignment="left">
-            </div>
+            <div id="google-signin-button"></div>
 
         </div>
 
