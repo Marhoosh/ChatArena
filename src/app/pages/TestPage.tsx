@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { Session, EmailOtpType } from "@supabase/gotrue-js/src/lib/types"
 
 // 扩展 Window 接口以包含我们的自定义属性
 declare global {
@@ -21,63 +22,64 @@ window.handleSignInWithGoogle = async function(response) {
 };
 
 // 动态加载Google Sign-In脚本
-const loadGoogleScript = () => {
-    return new Promise<void>((resolve) => {
-        const existingScript = document.getElementById('google-signin-script');
-        if (!existingScript) {
-            const script = document.createElement('script');
-            script.id = 'google-signin-script';
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.onload = () => resolve();
-            document.body.appendChild(script);
-        } else {
-            resolve();
-        }
-    });
-};
+function loadGoogleScript(){
+    const existingScript = document.getElementById('google-signin-script');
+    if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = 'google-signin-script';
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        document.body.appendChild(script);
+    }
+}
+
+
 
 // 初始化Google登录按钮
-const initializeGoogleSignIn = () => {
-    return loadGoogleScript().then(() => {
-        // 确保Google库已加载
-        if (window.google && window.google.accounts && window.google.accounts.id) {
-            // 重新初始化Google登录
-            window.google.accounts.id.initialize({
-                client_id: "280072408180-88habribp82fhbdpt10p7806r1a6j110.apps.googleusercontent.com",
-                callback: window.handleSignInWithGoogle,
-                context: "signin",
-                ux_mode: "popup",
-                auto_prompt: "false"
-            });
-            
-            // 渲染登录按钮
-            window.google.accounts.id.renderButton(
-                document.getElementById("google-signin-button"),
-                {
-                    type: "standard",
-                    shape: "rectangular",
-                    theme: "outline",
-                    text: "continue_with",
-                    size: "large",
-                    logo_alignment: "left"
-                }
-            );
-        }
-    });
+function initializeGoogleSignIn(){
+    loadGoogleScript()
+    // 确保Google库已加载
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+
+
+        // 重新初始化Google登录
+        window.google.accounts.id.initialize({
+            client_id: "280072408180-88habribp82fhbdpt10p7806r1a6j110.apps.googleusercontent.com",
+            callback: window.handleSignInWithGoogle,
+            context: "signin",
+            ux_mode: "popup",
+            auto_prompt: "false"
+        });
+        
+        // 渲染登录按钮
+        window.google.accounts.id.renderButton(
+            document.getElementById("google-signin-button"),
+            {
+                type: "standard",
+                shape: "rectangular",
+                theme: "outline",
+                text: "continue_with",
+                size: "large",
+                logo_alignment: "left"
+            }
+        );
+    }else {
+        // 如果Google库仍未加载，等待一段时间后重试
+        setTimeout(initializeGoogleSignIn, 100);
+    }
 };
 
 export default function TestPage() {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState("");
-    const [session, setSession] = useState(null);
+    const [session, setSession] = useState<Session | null>(null);
 
     // Check URL params on initial render
     const params = new URLSearchParams(window.location.search);
     const hasTokenHash = params.get("token_hash");
 
     const [verifying, setVerifying] = useState(!!hasTokenHash);
-    const [authError, setAuthError] = useState(null);
+    const [authError, setAuthError] = useState<string | null>(null);
     const [authSuccess, setAuthSuccess] = useState(false);
 
     useEffect(() => {
@@ -93,7 +95,7 @@ export default function TestPage() {
             // Verify the OTP token
             supabase.auth.verifyOtp({
                 token_hash,
-                type: type || "email",
+                type: (type as EmailOtpType) || "email",
             }).then(({ error }) => {
                 if (error) {
                     setAuthError(error.message);
@@ -125,7 +127,7 @@ export default function TestPage() {
         initializeGoogleSignIn();
     },[session]);
 
-    const handleLogin = async (event) => {
+    const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
         setLoading(true);
         const { error } = await supabase.auth.signInWithOtp({
@@ -135,7 +137,7 @@ export default function TestPage() {
             }
         });
         if (error) {
-            alert(error.error_description || error.message);
+            alert(error.message);
         } else {
             alert("Check your email for the login link!");
         }
