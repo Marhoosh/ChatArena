@@ -23,6 +23,8 @@ import ThemeSettingModal from '../ThemeSettingModal'
 import Tooltip from '../Tooltip'
 import NavLink from './NavLink'
 import PremiumEntry from './PremiumEntry'
+import Sign from './Sign'
+import SignModal from '../SignModal'
 
 function IconButton(props: { icon: string; onClick?: () => void }) {
   return (
@@ -39,6 +41,7 @@ function Sidebar() {
   const { t } = useTranslation()
   const [collapsed, setCollapsed] = useAtom(sidebarCollapsedAtom)
   const [themeSettingModalOpen, setThemeSettingModalOpen] = useState(false)
+  const [signModalOpen, setSignModalOpen] = useState(false)
   const enabledBots = useEnabledBots()
   const setShowDiscountModal = useSetAtom(showDiscountModalAtom)
   const setReleaseNotes = useSetAtom(releaseNotesAtom)
@@ -94,8 +97,10 @@ function Sidebar() {
       <div className="mt-auto pt-2">
         {!collapsed && <hr className="border-[#ffffff4d]" />}
         {!collapsed && (
-          <div className="my-5">
-            <PremiumEntry text={t('Premium')} />
+          <div className="my-5" onClick={() => setSignModalOpen(true)}>
+            <Sign text={t('sign in')} >
+
+            </Sign>
           </div>
         )}
         <div className={cx('flex mt-5 gap-[10px] mb-4', collapsed ? 'flex-col' : 'flex-row ')}>
@@ -112,6 +117,7 @@ function Sidebar() {
       {/* TODO: 实现用户好评引导弹窗 */}
       {/* <GuideModal /> */}
       <ThemeSettingModal open={themeSettingModalOpen} onClose={() => setThemeSettingModalOpen(false)} />
+      <SignModal open={signModalOpen} onClose={() => setSignModalOpen(false)} />
     </motion.aside>
   )
 }
