@@ -33,7 +33,6 @@ function loadGoogleScript(){
         script.async = true;
         document.body.appendChild(script);
     }
-    console.log('Google Sign-In script loaded');
 }
 
 
@@ -66,7 +65,6 @@ function initializeGoogleSignIn(){
                 logo_alignment: "left"
             }
         );
-        console.log('Google Sign-In button rendered');
     }else {
         // 如果Google库仍未加载，等待一段时间后重试
         setTimeout(initializeGoogleSignIn, 100);
@@ -93,7 +91,7 @@ const SignModal: FC<Props> = (props) => {
     const [authSuccess, setAuthSuccess] = useState(false);
 
     useEffect(() => {
-
+        if (!props.open) return;
         initializeGoogleSignIn();
 
         // Check if we have token_hash in URL (magic link callback)
@@ -131,11 +129,11 @@ const SignModal: FC<Props> = (props) => {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [props.open]);
 
     useEffect(() => {
         initializeGoogleSignIn();
-    },[session]);
+    }, [session]);
 
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
