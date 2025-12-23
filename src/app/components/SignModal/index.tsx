@@ -1,7 +1,7 @@
 import { useState, useEffect, FC } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Session, EmailOtpType } from "@supabase/gotrue-js/src/lib/types"
-import { Dialog } from "@headlessui/react";
+import Dialog from '../Dialog'
 import { useTranslation } from "react-i18next";
 
 // 扩展 Window 接口以包含我们的自定义属性
@@ -214,7 +214,7 @@ const SignModal: FC<Props> = (props) => {
     // Show login form
     return (
         <Dialog
-            title={t('Display Settings')}
+            title={t('Sign In')}
             open={props.open}
             onClose={props.onClose}
             className="rounded-xl w-[600px] min-h-[300px]"
