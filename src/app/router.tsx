@@ -1,4 +1,4 @@
-import { createBrowserHistory, createRootRoute, createRoute, createRouter, useParams } from '@tanstack/react-router'
+import { createBrowserHistory, createRootRoute, createRoute, createRouter, useParams, Outlet } from '@tanstack/react-router'
 import { BotId } from './bots'
 import Layout from './components/Layout'
 import MultiBotChatPanel from './pages/MultiBotChatPanel'
@@ -6,11 +6,19 @@ import PremiumPage from './pages/PremiumPage'
 import SettingPage from './pages/SettingPage'
 import SingleBotChatPanel from './pages/SingleBotChatPanel'
 import TestPage from './pages/TestPage'
+import Provider from './components/session/Provider'
 
 const rootRoute = createRootRoute()
 
-const layoutRoute = createRoute({
+const sessionRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: 'session',
+  component: Provider,
+})
+
+
+const layoutRoute = createRoute({
+  getParentRoute: () => sessionRoute,
   component: Layout,
   id: 'layout',
 })
@@ -55,7 +63,7 @@ export const premiumRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([layoutRoute.addChildren([indexRoute, chatRoute, settingRoute,testRoute, premiumRoute])])
+const routeTree = rootRoute.addChildren([sessionRoute.addChildren([layoutRoute.addChildren([indexRoute, chatRoute, settingRoute, testRoute, premiumRoute])])])
 
 const browserHistory = createBrowserHistory()
 const router = createRouter({ routeTree, history: browserHistory })

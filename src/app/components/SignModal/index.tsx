@@ -1,8 +1,9 @@
 import { useState, useEffect, FC } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Session, EmailOtpType } from "@supabase/gotrue-js/src/lib/types"
 import Dialog from '../Dialog'
 import { useTranslation } from "react-i18next";
+import supabase from "~services/supabase";
+import { useSession } from "../session/SessionContext";
 
 // 扩展 Window 接口以包含我们的自定义属性
 declare global {
@@ -12,7 +13,6 @@ declare global {
   }
 }
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 
 // 将Google登录处理函数添加到全局作用域
 window.handleSignInWithGoogle = async function(response) {
@@ -38,11 +38,10 @@ function loadGoogleScript(){
 
 
 // 初始化Google登录按钮
-function initializeGoogleSignIn(){
+function initializeGoogleSignIn(maxRetries = 5, currentRetry = 0){
     loadGoogleScript()
     // 确保Google库已加载
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-
+    if (window.google && window.google.accounts && window.google.accounts.id && document.getElementById("google-signin-button")) {
 
         // 重新初始化Google登录
         window.google.accounts.id.initialize({
@@ -52,7 +51,7 @@ function initializeGoogleSignIn(){
             ux_mode: "popup",
             auto_prompt: "false"
         });
-        
+    
         // 渲染登录按钮
         window.google.accounts.id.renderButton(
             document.getElementById("google-signin-button"),
@@ -65,9 +64,15 @@ function initializeGoogleSignIn(){
                 logo_alignment: "left"
             }
         );
+
+        console.log("Google Sign-In button rendered");
     }else {
         // 如果Google库仍未加载，等待一段时间后重试
-        setTimeout(initializeGoogleSignIn, 100);
+        if (currentRetry < maxRetries) {
+            setTimeout(() => initializeGoogleSignIn(maxRetries, currentRetry + 1), 100);
+        } else {
+            alert("Google Sign-In library failed to load after retries");
+        }
     }
 };
 
@@ -80,7 +85,7 @@ const SignModal: FC<Props> = (props) => {
     const { t, i18n } = useTranslation()
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState("");
-    const [session, setSession] = useState<Session | null>(null);
+    const { session } = useSession();
 
     // Check URL params on initial render
     const params = new URLSearchParams(window.location.search);
@@ -116,19 +121,7 @@ const SignModal: FC<Props> = (props) => {
             });
         }
 
-        // Check for existing session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-        });
 
-        // Listen for auth changes
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            setSession(session);
-        });
-
-        return () => subscription.unsubscribe();
     }, [props.open]);
 
     useEffect(() => {
@@ -154,7 +147,7 @@ const SignModal: FC<Props> = (props) => {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        setSession(null);
+        // setSession(null);
     };
 
     // Show verification state
