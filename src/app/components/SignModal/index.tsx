@@ -124,9 +124,6 @@ const SignModal: FC<Props> = (props) => {
 
     }, [props.open]);
 
-    useEffect(() => {
-        initializeGoogleSignIn();
-    }, [session]);
 
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -147,6 +144,7 @@ const SignModal: FC<Props> = (props) => {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
+        // TODO:这里应该清除session
         // setSession(null);
     };
 
