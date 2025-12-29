@@ -25,7 +25,7 @@ import NavLink from './NavLink'
 import PremiumEntry from './PremiumEntry'
 import Sign from './Sign'
 import SignModal from '../SignModal'
-import Usage from './Usage'
+import UsageModal from './UsageModal'
 
 function IconButton(props: { icon: string; onClick?: () => void }) {
   return (
@@ -111,9 +111,9 @@ function Sidebar() {
 
         {!collapsed && (
           <div className="my-5">
-            <Usage>
+            <UsageModal>
 
-            </Usage>
+            </UsageModal>
           </div>
         )}
 
