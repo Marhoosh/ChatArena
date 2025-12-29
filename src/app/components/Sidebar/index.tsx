@@ -25,6 +25,7 @@ import NavLink from './NavLink'
 import PremiumEntry from './PremiumEntry'
 import Sign from './Sign'
 import SignModal from '../SignModal'
+import Usage from './Usage'
 
 function IconButton(props: { icon: string; onClick?: () => void }) {
   return (
@@ -65,6 +66,10 @@ function Sidebar() {
     )
   }, [])
 
+  useEffect(() => {
+    console.log('signModalOpen', signModalOpen)
+  }, [signModalOpen]);
+
   return (
     <motion.aside
       className={cx(
@@ -103,6 +108,15 @@ function Sidebar() {
             </Sign>
           </div>
         )}
+
+        {!collapsed && (
+          <div className="my-5">
+            <Usage>
+
+            </Usage>
+          </div>
+        )}
+
         <div className={cx('flex mt-5 gap-[10px] mb-4', collapsed ? 'flex-col' : 'flex-row ')}>
           {!collapsed && (
             <Tooltip content={t('Settings')}>
@@ -117,7 +131,10 @@ function Sidebar() {
       {/* TODO: 实现用户好评引导弹窗 */}
       {/* <GuideModal /> */}
       <ThemeSettingModal open={themeSettingModalOpen} onClose={() => setThemeSettingModalOpen(false)} />
-      <SignModal open={signModalOpen} onClose={() => setSignModalOpen(false)} />
+      <SignModal open={signModalOpen} onClose={() => {
+        console.log('close signModalOpen')
+        setSignModalOpen(false)
+        }} />
     </motion.aside>
   )
 }

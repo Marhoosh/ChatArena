@@ -144,8 +144,7 @@ const SignModal: FC<Props> = (props) => {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        // TODO:这里应该清除session
-        // setSession(null);
+        props.onClose(); 
     };
 
     // Show verification state
@@ -180,6 +179,9 @@ const SignModal: FC<Props> = (props) => {
 
     // Show auth success (briefly before session loads)
     if (authSuccess && !session) {
+
+        props.onClose();
+
         return (
             <div>
                 <h1>Authentication</h1>
@@ -191,10 +193,12 @@ const SignModal: FC<Props> = (props) => {
 
     // If user is logged in, show welcome screen
     if (session) {
+
+        props.onClose();
+
         return (
             <div>
-                <h1>Welcome!</h1>
-                <p>You are logged in as: {session.user.email}</p>
+                <p>{session.user.email}</p>
                 <button onClick={handleLogout}>
                     Sign Out
                 </button>

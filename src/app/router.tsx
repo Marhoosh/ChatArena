@@ -52,6 +52,8 @@ const testRoute = createRoute({
   component: TestPage,
 })
 
+//TODO: 给用户profile界面设为保护界面,也就是未登录时跳转到登录界面
+
 export const premiumRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: 'premium',
