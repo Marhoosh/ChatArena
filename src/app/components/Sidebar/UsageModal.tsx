@@ -1,58 +1,62 @@
 import { useEffect, useState } from "react";
 import { useSession } from "../session/SessionContext";
-import { getUsageByUserId } from "~db/index";
-import type { Usage } from "~db/schema";
+import { usageService } from "../../../db/services/usage";
 
 
 export default function UsageModal() {
     const { session } = useSession();
-    const [usage, setUsage] = useState<Usage | null>(null);
+    const [usageStats, setUsageStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let cancelled = false;
-
-        const fetchUsage = async () => {
-            if (!session?.user?.id) {
-                setUsage(null);
-                setLoading(false);
-                return;
-            }
-
-            setLoading(true);
+        const fetchUsageData = async () => {
+            if (!session?.user?.id) return;
+            
             try {
-                const result = await getUsageByUserId(session.user.id);
-                if (!cancelled) {
-                    setUsage(result);
+                setLoading(true);
+                const { stats, error } = await usageService.getTotalUsageByUser(session.user.id);
+                
+                if (error) {
+                    setError(error.message);
+                } else {
+                    setUsageStats(stats);
                 }
-            } catch (error) {
-                console.error("Failed to fetch usage data", error);
-                if (!cancelled) {
-                    setUsage(null);
-                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch usage data');
             } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
+                setLoading(false);
             }
         };
 
-        fetchUsage();
+        fetchUsageData();
+    }, [session]);
 
-        return () => {
-            cancelled = true;
-        };
-    }, [session?.user?.id]);
-
-    if (!session || loading) {
+    if (!session) {
         return null;
+    }
+
+    if (loading) {
+        return (
+            <div>
+                <h1>Loading usage data...</h1>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div>
+                <h1>Error: {error}</h1>
+            </div>
+        );
     }
 
     return (
         <div>
-            <h1>Basic: {usage?.basic ?? 0}</h1>
-            <h1>Advanced: {usage?.advanced ?? 0}</h1>
-            <h1>Images: {usage?.images ?? 0}</h1>
+            <h1>Basic: {usageStats?.totalBasic || 0}</h1>
+            <h1>Advanced: {usageStats?.totalAdvanced || 0}</h1>
+            <h1>Images: {usageStats?.totalImages || 0}</h1>
         </div>
     )
 }
