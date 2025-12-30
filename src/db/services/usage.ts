@@ -121,7 +121,12 @@ export class UsageService {
         return { usage: null, error: error || new Error("Usage record not found") };
       }
       
-      return await usageMutations.resetUsage(usage.id);
+      const { data, error: resetError } = await usageMutations.resetUsage(usage.id);
+      
+      return {
+        usage: data,
+        error: resetError ? new Error(resetError.message) : null,
+      };
     } catch (error) {
       return {
         usage: null,
