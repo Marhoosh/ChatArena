@@ -1,6 +1,6 @@
 import { User } from "@supabase/supabase-js";
 import { supabase } from "../client";
-import { AuthState } from "../types";
+import { AuthState } from "~db/types";
 
 export class AuthService {
   async signUp(email: string, password: string): Promise<{ user: User | null; error: Error | null }> {
