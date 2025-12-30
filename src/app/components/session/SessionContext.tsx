@@ -1,6 +1,6 @@
 import {createContext, useContext, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
-import supabase from "~services/supabase";
+import supabase from "~db/client";
 import LoadingPage from "~app/pages/LoadingPage";
 
 const SessionContext = createContext<{

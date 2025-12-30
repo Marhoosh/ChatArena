@@ -2,7 +2,7 @@ import { useState, useEffect, FC } from "react";
 import { Session, EmailOtpType } from "@supabase/gotrue-js/src/lib/types"
 import Dialog from '../Dialog'
 import { useTranslation } from "react-i18next";
-import supabase from "~services/supabase";
+import supabase from "~db/client";
 import { useSession } from "../session/SessionContext";
 
 // 扩展 Window 接口以包含我们的自定义属性
