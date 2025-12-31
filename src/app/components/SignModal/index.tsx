@@ -196,14 +196,7 @@ const SignModal: FC<Props> = (props) => {
 
         props.onClose();
 
-        return (
-            <div>
-                <p>{session.user.email}</p>
-                <button onClick={handleLogout}>
-                    Sign Out
-                </button>
-            </div>
-        );
+        return null;
     }
 
     // Show login form

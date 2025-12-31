@@ -125,7 +125,14 @@ function Sidebar() {
               </a>
             </Tooltip>
           )}
-    
+
+          {!collapsed && (
+            <Tooltip content={t('profile')}>
+              <a href="/profile">
+                <IconButton icon={themeIcon} />
+              </a>
+            </Tooltip>
+          )}
         </div>
       </div>
       {/* TODO: 实现用户好评引导弹窗 */}

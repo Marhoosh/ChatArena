@@ -7,6 +7,7 @@ import SettingPage from './pages/SettingPage'
 import SingleBotChatPanel from './pages/SingleBotChatPanel'
 import TestPage from './pages/TestPage'
 import Provider from './components/session/Provider'
+import ProfilePage from './pages/ProfilePage'
 
 const rootRoute = createRootRoute()
 
@@ -52,6 +53,12 @@ const testRoute = createRoute({
   component: TestPage,
 })
 
+const profileRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: 'profile',
+  component: ProfilePage,
+})
+
 //TODO: 给用户profile界面设为保护界面,也就是未登录时跳转到登录界面
 
 export const premiumRoute = createRoute({
@@ -65,7 +72,7 @@ export const premiumRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([sessionRoute.addChildren([layoutRoute.addChildren([indexRoute, chatRoute, settingRoute, testRoute, premiumRoute])])])
+const routeTree = rootRoute.addChildren([sessionRoute.addChildren([layoutRoute.addChildren([indexRoute, chatRoute, settingRoute, testRoute, profileRoute, premiumRoute])])])
 
 const browserHistory = createBrowserHistory()
 const router = createRouter({ routeTree, history: browserHistory })

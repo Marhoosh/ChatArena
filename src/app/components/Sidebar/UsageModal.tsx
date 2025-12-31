@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSession } from "../session/SessionContext";
 import { usageService } from "../../../db/services/usage";
+import { useTranslation } from "react-i18next";
 
 
 export default function UsageModal() {
+    const { t } = useTranslation()
     const { session } = useSession();
     const [usageStats, setUsageStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export default function UsageModal() {
     if (loading) {
         return (
             <div>
-                <h1>Loading usage data...</h1>
+                <h1>{t('loadingUsageData')}</h1>
             </div>
         );
     }
@@ -47,16 +49,16 @@ export default function UsageModal() {
     if (error) {
         return (
             <div>
-                <h1>Error: {error}</h1>
+                <h1>{t('errorFetchingUsageData')}: {error}</h1>
             </div>
         );
     }
 
     return (
         <div>
-            <h1>Basic: {usageStats?.totalBasic || 0}</h1>
-            <h1>Advanced: {usageStats?.totalAdvanced || 0}</h1>
-            <h1>Images: {usageStats?.totalImages || 0}</h1>
+            <h1>{t('basic')}: {usageStats?.totalBasic || 0}</h1>
+            <h1>{t('advanced')}: {usageStats?.totalAdvanced || 0}</h1>
+            <h1>{t('image')}: {usageStats?.totalImages || 0}</h1>
         </div>
     )
 }
