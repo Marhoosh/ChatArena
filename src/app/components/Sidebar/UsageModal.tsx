@@ -30,7 +30,7 @@ export default function UsageModal() {
         };
 
         fetchUsageData();
-    }, [session]);
+    }, []);
 
     if (!session) {
         return null;
