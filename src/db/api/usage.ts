@@ -10,7 +10,7 @@ export const usageQueries = {
     return supabase
       .from("usage")
       .select("*")
-      .eq("userId", userId)
+      .eq("user_id", userId)
       .single();
   },
 
@@ -18,8 +18,8 @@ export const usageQueries = {
     return supabase
       .from("usage")
       .select("*")
-      .eq("userId", userId)
-      .order("createdAt", { ascending: false })
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
       .limit(limit);
   },
 
@@ -27,17 +27,17 @@ export const usageQueries = {
     return supabase
       .from("usage")
       .select("*")
-      .eq("userId", userId)
-      .gte("createdAt", startDate)
-      .lte("createdAt", endDate)
-      .order("createdAt", { ascending: false });
+      .eq("user_id", userId)
+      .gte("created_at", startDate)
+      .lte("created_at", endDate)
+      .order("created_at", { ascending: false });
   },
 
   getTotalUsageByUser: async (userId: string) => {
     return supabase
       .from("usage")
       .select("basic, advanced, images")
-      .eq("userId", userId);
+      .eq("user_id", userId);
   },
 };
 
@@ -51,7 +51,7 @@ export const usageMutations = {
     return supabase
       .from("usage")
       .insert({
-        userId,
+        user_id: userId,
         basic,
         advanced,
         images,
@@ -68,7 +68,7 @@ export const usageMutations = {
       .from("usage")
       .update({
         ...updates,
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select()
@@ -97,7 +97,7 @@ export const usageMutations = {
         basic: 0,
         advanced: 0,
         images: 0,
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select()
