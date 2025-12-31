@@ -56,9 +56,9 @@ export default function UsageModal() {
 
     return (
         <div>
-            <h1>{t('basic')}: {usageStats?.totalBasic || 0}</h1>
-            <h1>{t('advanced')}: {usageStats?.totalAdvanced || 0}</h1>
-            <h1>{t('image')}: {usageStats?.totalImages || 0}</h1>
+            <h1>{t('basic')}: {usageStats?.totalBasic || 0}, {t('limit')}: {usageStats?.basic_limit || 0}</h1>
+            <h1>{t('advanced')}: {usageStats?.totalAdvanced || 0}, {t('limit')}: {usageStats?.advanced_limit || 0}</h1>
+            <h1>{t('image')}: {usageStats?.totalImages || 0}, {t('limit')}: {usageStats?.gen_image_limit || 0}</h1>
         </div>
     )
 }

@@ -7,6 +7,9 @@ export interface UsageStats {
   totalBasic: number;
   totalAdvanced: number;
   totalImages: number;
+  basic_limit?: number;
+  advanced_limit?: number;
+  gen_image_limit?: number;
 }
 
 export class UsageService {
@@ -28,12 +31,12 @@ export class UsageService {
 
   async createUsage(
     userId: string,
-    basic: number = 0,
-    advanced: number = 0,
-    images: number = 0
+    basic_usage: number = 0,
+    advanced_usage: number = 0,
+    gen_image_usage: number = 0
   ): Promise<{ usage: UsageRow | null; error: Error | null }> {
     try {
-      const { data, error } = await usageMutations.createUsage(userId, basic, advanced, images);
+      const { data, error } = await usageMutations.createUsage(userId, basic_usage, advanced_usage, gen_image_usage);
 
       return {
         usage: data,
@@ -70,7 +73,7 @@ export class UsageService {
 
   async updateUsage(
     id: string,
-    updates: Partial<Pick<UsageRow, "basic" | "advanced" | "images">>
+    updates: Partial<Pick<UsageRow, "basic_usage" | "advanced_usage" | "gen_image_usage">>
   ): Promise<{ usage: UsageRow | null; error: Error | null }> {
     try {
       const { data, error } = await usageMutations.updateUsage(id, updates);
@@ -187,9 +190,14 @@ export class UsageService {
 
       if (data && data.length > 0) {
         data.forEach((record) => {
-          stats.totalBasic += record.basic || 0;
-          stats.totalAdvanced += record.advanced || 0;
-          stats.totalImages += record.images || 0;
+          stats.totalBasic += record.basic_usage || 0;
+          stats.totalAdvanced += record.advanced_usage || 0;
+          stats.totalImages += record.gen_image_usage || 0;
+          
+          // 获取限制值（假设每个用户只有一条记录）
+          if (!stats.basic_limit) stats.basic_limit = record.basic_limit || 0;
+          if (!stats.advanced_limit) stats.advanced_limit = record.advanced_limit || 0;
+          if (!stats.gen_image_limit) stats.gen_image_limit = record.gen_image_limit || 0;
         });
       }
 

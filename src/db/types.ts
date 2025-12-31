@@ -18,29 +18,38 @@ export type Database = {
     Tables: {
       usage: {
         Row: {
-          advanced: number
-          basic: number
+          advanced_limit: number
+          advanced_usage: number
+          basic_limit: number
+          basic_usage: number
           created_at: string
+          gen_image_limit: number
+          gen_image_usage: number
           id: string
-          images: number
           updated_at: string
           user_id: string
         }
         Insert: {
-          advanced?: number
-          basic?: number
+          advanced_limit?: number
+          advanced_usage?: number
+          basic_limit?: number
+          basic_usage?: number
           created_at?: string
+          gen_image_limit?: number
+          gen_image_usage?: number
           id?: string
-          images?: number
           updated_at?: string
           user_id: string
         }
         Update: {
-          advanced?: number
-          basic?: number
+          advanced_limit?: number
+          advanced_usage?: number
+          basic_limit?: number
+          basic_usage?: number
           created_at?: string
+          gen_image_limit?: number
+          gen_image_usage?: number
           id?: string
-          images?: number
           updated_at?: string
           user_id?: string
         }

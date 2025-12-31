@@ -36,7 +36,7 @@ export const usageQueries = {
   getTotalUsageByUser: async (userId: string) => {
     return supabase
       .from("usage")
-      .select("basic, advanced, images")
+      .select("basic_usage, advanced_usage, gen_image_usage, basic_limit, advanced_limit, gen_image_limit")
       .eq("user_id", userId);
   },
 };
@@ -44,17 +44,17 @@ export const usageQueries = {
 export const usageMutations = {
   createUsage: async (
     userId: string,
-    basic: number = 0,
-    advanced: number = 0,
-    images: number = 0
+    basic_usage: number = 0,
+    advanced_usage: number = 0,
+    gen_image_usage: number = 0
   ) => {
     return supabase
       .from("usage")
       .insert({
         user_id: userId,
-        basic,
-        advanced,
-        images,
+        basic_usage,
+        advanced_usage,
+        gen_image_usage,
       })
       .select()
       .single();
@@ -62,7 +62,7 @@ export const usageMutations = {
 
   updateUsage: async (
     id: string,
-    updates: Partial<Pick<UsageRow, "basic" | "advanced" | "images">>
+    updates: Partial<Pick<UsageRow, "basic_usage" | "advanced_usage" | "gen_image_usage">>
   ) => {
     return supabase
       .from("usage")
@@ -81,7 +81,8 @@ export const usageMutations = {
     amount: number = 1
   ) => {
     const updateField: Record<string, number> = {};
-    updateField[type] = amount;
+    const usageType = type === "images" ? "gen_image_usage" : `${type}_usage`;
+    updateField[usageType] = amount;
     
     return supabase.rpc('increment_usage', {
       usage_id: id,
@@ -94,9 +95,9 @@ export const usageMutations = {
     return supabase
       .from("usage")
       .update({
-        basic: 0,
-        advanced: 0,
-        images: 0,
+        basic_usage: 0,
+        advanced_usage: 0,
+        gen_image_usage: 0,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
