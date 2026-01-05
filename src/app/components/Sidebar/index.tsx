@@ -128,9 +128,9 @@ function Sidebar() {
 
           {!collapsed && (
             <Tooltip content={t('profile')}>
-              <a href="/profile">
+              <Link to="/profile">
                 <IconButton icon={themeIcon} />
-              </a>
+              </Link>
             </Tooltip>
           )}
         </div>
