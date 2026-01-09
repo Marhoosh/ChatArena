@@ -14,15 +14,6 @@ export const usageQueries = {
       .single();
   },
 
-  getUsageHistory: async (userId: string, limit: number = 10) => {
-    return supabase
-      .from("usage")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(limit);
-  },
-
   getUsageByDateRange: async (userId: string, startDate: string, endDate: string) => {
     return supabase
       .from("usage")
@@ -31,13 +22,6 @@ export const usageQueries = {
       .gte("created_at", startDate)
       .lte("created_at", endDate)
       .order("created_at", { ascending: false });
-  },
-
-  getTotalUsageByUser: async (userId: string) => {
-    return supabase
-      .from("usage")
-      .select("basic_usage, advanced_usage, gen_image_usage, basic_limit, advanced_limit, gen_image_limit")
-      .eq("user_id", userId);
   },
 };
 

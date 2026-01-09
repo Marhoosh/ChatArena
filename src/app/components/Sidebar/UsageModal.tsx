@@ -17,12 +17,12 @@ export default function UsageModal() {
             
             try {
                 setLoading(true);
-                const { stats, error } = await usageService.getTotalUsageByUser(session.user.id);
+                const { usage, error } = await usageService.getUserUsage(session.user.id);
                 
                 if (error) {
                     setError(error.message);
                 } else {
-                    setUsageStats(stats);
+                    setUsageStats(usage);
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch usage data');
@@ -56,9 +56,9 @@ export default function UsageModal() {
 
     return (
         <div>
-            <h1>{t('basic')}: {usageStats?.totalBasic || 0}, {t('limit')}: {usageStats?.basic_limit || 0}</h1>
-            <h1>{t('advanced')}: {usageStats?.totalAdvanced || 0}, {t('limit')}: {usageStats?.advanced_limit || 0}</h1>
-            <h1>{t('image')}: {usageStats?.totalImages || 0}, {t('limit')}: {usageStats?.gen_image_limit || 0}</h1>
+            <h1>{t('basic')}: {usageStats?.basic_usage || 0}, {t('limit')}: {usageStats?.basic_limit || 0}</h1>
+            <h1>{t('advanced')}: {usageStats?.advanced_usage || 0}, {t('limit')}: {usageStats?.advanced_limit || 0}</h1>
+            <h1>{t('image')}: {usageStats?.gen_image_usage || 0}, {t('limit')}: {usageStats?.gen_image_limit || 0}</h1>
         </div>
     )
 }

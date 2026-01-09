@@ -3,15 +3,6 @@ import { Database } from "../types";
 
 type UsageRow = Database["public"]["Tables"]["usage"]["Row"];
 
-export interface UsageStats {
-  totalBasic: number;
-  totalAdvanced: number;
-  totalImages: number;
-  basic_limit?: number;
-  advanced_limit?: number;
-  gen_image_limit?: number;
-}
-
 export class UsageService {
   async getUserUsage(userId: string): Promise<{ usage: UsageRow | null; error: Error | null }> {
     try {
@@ -138,22 +129,6 @@ export class UsageService {
     }
   }
 
-  async getUsageHistory(userId: string, limit: number = 10): Promise<{ history: UsageRow[]; error: Error | null }> {
-    try {
-      const { data, error } = await usageQueries.getUsageHistory(userId, limit);
-
-      return {
-        history: data || [],
-        error: error ? new Error(error.message) : null,
-      };
-    } catch (error) {
-      return {
-        history: [],
-        error: error as Error,
-      };
-    }
-  }
-
   async getUsageByDateRange(
     userId: string,
     startDate: string,
@@ -174,51 +149,15 @@ export class UsageService {
     }
   }
 
-  async getTotalUsageByUser(userId: string): Promise<{ stats: UsageStats | null; error: Error | null }> {
-    try {
-      const { data, error } = await usageQueries.getTotalUsageByUser(userId);
-
-      if (error) {
-        return { stats: null, error: new Error(error.message) };
-      }
-
-      const stats: UsageStats = {
-        totalBasic: 0,
-        totalAdvanced: 0,
-        totalImages: 0,
-      };
-
-      if (data && data.length > 0) {
-        data.forEach((record) => {
-          stats.totalBasic += record.basic_usage || 0;
-          stats.totalAdvanced += record.advanced_usage || 0;
-          stats.totalImages += record.gen_image_usage || 0;
-          
-          // 获取限制值（假设每个用户只有一条记录）
-          if (!stats.basic_limit) stats.basic_limit = record.basic_limit || 0;
-          if (!stats.advanced_limit) stats.advanced_limit = record.advanced_limit || 0;
-          if (!stats.gen_image_limit) stats.gen_image_limit = record.gen_image_limit || 0;
-        });
-      }
-
-      return { stats, error: null };
-    } catch (error) {
-      return {
-        stats: null,
-        error: error as Error,
-      };
-    }
-  }
-
   async checkUsageLimit(
     userId: string,
     type: "basic" | "advanced" | "images",
     limit: number
   ): Promise<{ withinLimit: boolean; currentUsage: number; error: Error | null }> {
     try {
-      const { stats, error } = await this.getTotalUsageByUser(userId);
+      const { usage, error } = await this.getUserUsage(userId);
       
-      if (error || !stats) {
+      if (error || !usage) {
         return { 
           withinLimit: false, 
           currentUsage: 0, 
@@ -229,13 +168,13 @@ export class UsageService {
       let currentUsage = 0;
       switch (type) {
         case "basic":
-          currentUsage = stats.totalBasic;
+          currentUsage = usage.basic_usage || 0;
           break;
         case "advanced":
-          currentUsage = stats.totalAdvanced;
+          currentUsage = usage.advanced_usage || 0;
           break;
         case "images":
-          currentUsage = stats.totalImages;
+          currentUsage = usage.gen_image_usage || 0;
           break;
       }
       
