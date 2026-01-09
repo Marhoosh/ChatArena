@@ -115,6 +115,6 @@ export const conversationMutations = {
   },
 
   deleteConversationsByBot: async (botId: string) => {
-    return supabase.from("conversations").delete().eq("bot_id", botId),
+    return supabase.from("conversations").delete().eq("bot_id", botId);
   },
 };
