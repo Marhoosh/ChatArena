@@ -17,6 +17,11 @@ export const useSession = () => {
   return context;
 };
 
+export function getSessionUser() {
+  const { session } = useSession();
+  return session?.user || null;
+}
+
 
 type Props = { children: React.ReactNode };
 export default function SessionProvider({ children }: Props) {

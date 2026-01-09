@@ -123,6 +123,7 @@ export type Database = {
     Views: {
       [_ in never]: never
     }
+    //TODO：这里的increment_usage干嘛的，能不能删掉，db中的一些文件能不能删了
     Functions: {
       increment_usage: {
         Args: {
