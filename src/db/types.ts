@@ -16,6 +16,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          bot_id: string
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          bot_id: string
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          bot_id?: string
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          author: string
+          conversation_id: string
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          image_data: string | null
+          image_type: string | null
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          author: string
+          conversation_id: string
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          image_data?: string | null
+          image_type?: string | null
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          conversation_id?: string
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          image_data?: string | null
+          image_type?: string | null
+          text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       usage: {
         Row: {
           advanced_limit: number
