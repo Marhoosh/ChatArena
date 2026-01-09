@@ -3,13 +3,41 @@ import { Database } from "../types";
 
 type UsageRow = Database["public"]["Tables"]["usage"]["Row"];
 
+export interface UsageStats {
+  id: string;
+  userId: string;
+  basicUsage: number;
+  basicLimit: number;
+  advancedUsage: number;
+  advancedLimit: number;
+  genImageUsage: number;
+  genImageLimit: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function convertToUsageStats(dbUsage: UsageRow): UsageStats {
+  return {
+    id: dbUsage.id,
+    userId: dbUsage.user_id,
+    basicUsage: dbUsage.basic_usage,
+    basicLimit: dbUsage.basic_limit,
+    advancedUsage: dbUsage.advanced_usage,
+    advancedLimit: dbUsage.advanced_limit,
+    genImageUsage: dbUsage.gen_image_usage,
+    genImageLimit: dbUsage.gen_image_limit,
+    createdAt: dbUsage.created_at,
+    updatedAt: dbUsage.updated_at,
+  };
+}
+
 export class UsageService {
-  async getUserUsage(userId: string): Promise<{ usage: UsageRow | null; error: Error | null }> {
+  async getUserUsage(userId: string): Promise<{ usage: UsageStats | null; error: Error | null }> {
     try {
       const { data, error } = await usageQueries.getUserUsage(userId);
 
       return {
-        usage: data,
+        usage: data ? convertToUsageStats(data) : null,
         error: error ? new Error(error.message) : null,
       };
     } catch (error) {
@@ -25,12 +53,12 @@ export class UsageService {
     basic_usage: number = 0,
     advanced_usage: number = 0,
     gen_image_usage: number = 0
-  ): Promise<{ usage: UsageRow | null; error: Error | null }> {
+  ): Promise<{ usage: UsageStats | null; error: Error | null }> {
     try {
       const { data, error } = await usageMutations.createUsage(userId, basic_usage, advanced_usage, gen_image_usage);
 
       return {
-        usage: data,
+        usage: data ? convertToUsageStats(data) : null,
         error: error ? new Error(error.message) : null,
       };
     } catch (error) {
@@ -41,7 +69,7 @@ export class UsageService {
     }
   }
 
-  async getOrCreateUsage(userId: string): Promise<{ usage: UsageRow | null; error: Error | null }> {
+  async getOrCreateUsage(userId: string): Promise<{ usage: UsageStats | null; error: Error | null }> {
     try {
       const { usage, error } = await this.getUserUsage(userId);
       
@@ -65,12 +93,12 @@ export class UsageService {
   async updateUsage(
     id: string,
     updates: Partial<Pick<UsageRow, "basic_usage" | "advanced_usage" | "gen_image_usage">>
-  ): Promise<{ usage: UsageRow | null; error: Error | null }> {
+  ): Promise<{ usage: UsageStats | null; error: Error | null }> {
     try {
       const { data, error } = await usageMutations.updateUsage(id, updates);
 
       return {
-        usage: data,
+        usage: data ? convertToUsageStats(data) : null,
         error: error ? new Error(error.message) : null,
       };
     } catch (error) {
@@ -107,7 +135,7 @@ export class UsageService {
     }
   }
 
-  async resetUsage(userId: string): Promise<{ usage: UsageRow | null; error: Error | null }> {
+  async resetUsage(userId: string): Promise<{ usage: UsageStats | null; error: Error | null }> {
     try {
       const { usage, error } = await this.getUserUsage(userId);
       
@@ -118,7 +146,7 @@ export class UsageService {
       const { data, error: resetError } = await usageMutations.resetUsage(usage.id);
       
       return {
-        usage: data,
+        usage: data ? convertToUsageStats(data) : null,
         error: resetError ? new Error(resetError.message) : null,
       };
     } catch (error) {
@@ -133,12 +161,12 @@ export class UsageService {
     userId: string,
     startDate: string,
     endDate: string
-  ): Promise<{ history: UsageRow[]; error: Error | null }> {
+  ): Promise<{ history: UsageStats[]; error: Error | null }> {
     try {
       const { data, error } = await usageQueries.getUsageByDateRange(userId, startDate, endDate);
 
       return {
-        history: data || [],
+        history: data ? data.map(convertToUsageStats) : [],
         error: error ? new Error(error.message) : null,
       };
     } catch (error) {
@@ -168,13 +196,13 @@ export class UsageService {
       let currentUsage = 0;
       switch (type) {
         case "basic":
-          currentUsage = usage.basic_usage || 0;
+          currentUsage = usage.basicUsage || 0;
           break;
         case "advanced":
-          currentUsage = usage.advanced_usage || 0;
+          currentUsage = usage.advancedUsage || 0;
           break;
         case "images":
-          currentUsage = usage.gen_image_usage || 0;
+          currentUsage = usage.genImageUsage || 0;
           break;
       }
       

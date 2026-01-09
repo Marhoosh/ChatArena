@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSession } from "../session/SessionContext";
-import { usageService } from "../../../db/services/usage";
+import { usageService, UsageStats } from "../../../db/services/usage";
 import { useTranslation } from "react-i18next";
 
 
 export default function UsageModal() {
     const { t } = useTranslation()
     const { session } = useSession();
-    const [usageStats, setUsageStats] = useState<any>(null);
+    const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -53,12 +53,11 @@ export default function UsageModal() {
             </div>
         );
     }
-
     return (
         <div>
-            <h1>{t('basic')}: {usageStats?.basic_usage || 0}, {t('limit')}: {usageStats?.basic_limit || 0}</h1>
-            <h1>{t('advanced')}: {usageStats?.advanced_usage || 0}, {t('limit')}: {usageStats?.advanced_limit || 0}</h1>
-            <h1>{t('image')}: {usageStats?.gen_image_usage || 0}, {t('limit')}: {usageStats?.gen_image_limit || 0}</h1>
+            <h1>{t('basic')}: {usageStats?.basicUsage || 0}, {t('limit')}: {usageStats?.basicLimit || 0}</h1>
+            <h1>{t('advanced')}: {usageStats?.advancedUsage || 0}, {t('limit')}: {usageStats?.advancedLimit || 0}</h1>
+            <h1>{t('image')}: {usageStats?.genImageUsage || 0}, {t('limit')}: {usageStats?.genImageLimit || 0}</h1>
         </div>
     )
 }
