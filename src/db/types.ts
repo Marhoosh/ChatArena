@@ -1,5 +1,3 @@
-import { User } from "@supabase/supabase-js";
-
 export type Json =
   | string
   | number
@@ -142,12 +140,6 @@ export type Database = {
       [_ in never]: never
     }
   }
-}
-
-export interface AuthState {
-  user: User | null;
-  loading: boolean;
-  error: Error | null;
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
