@@ -49,8 +49,7 @@ export type Database = {
           error_code: string | null
           error_message: string | null
           id: string
-          image_data: string | null
-          image_type: string | null
+          image_url: string | null
           text: string
           updated_at: string
         }
@@ -61,8 +60,7 @@ export type Database = {
           error_code?: string | null
           error_message?: string | null
           id?: string
-          image_data?: string | null
-          image_type?: string | null
+          image_url?: string | null
           text: string
           updated_at?: string
         }
@@ -73,8 +71,7 @@ export type Database = {
           error_code?: string | null
           error_message?: string | null
           id?: string
-          image_data?: string | null
-          image_type?: string | null
+          image_url?: string | null
           text?: string
           updated_at?: string
         }
