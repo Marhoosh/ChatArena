@@ -12,84 +12,21 @@ export const usageQueries = {
       .select("*")
       .eq("user_id", userId)
       .single();
-  },
-
-  getUsageByDateRange: async (userId: string, startDate: string, endDate: string) => {
-    return supabase
-      .from("usage")
-      .select("*")
-      .eq("user_id", userId)
-      .gte("created_at", startDate)
-      .lte("created_at", endDate)
-      .order("created_at", { ascending: false });
-  },
+  }
 };
 
 export const usageMutations = {
-  createUsage: async (
-    userId: string,
-    basic_usage: number = 0,
-    advanced_usage: number = 0,
-    gen_image_usage: number = 0
-  ) => {
-    return supabase
-      .from("usage")
-      .insert({
-        user_id: userId,
-        basic_usage,
-        advanced_usage,
-        gen_image_usage,
-      })
-      .select()
-      .single();
-  },
 
-  updateUsage: async (
-    id: string,
-    updates: Partial<Pick<UsageRow, "basic_usage" | "advanced_usage" | "gen_image_usage">>
-  ) => {
-    return supabase
-      .from("usage")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select()
-      .single();
-  },
-
+  //TODO：防止用户直接调接口(不止更新接口)更新各种字段，此处Partial只是ts的类型检查，不做运行时的筛选
   incrementUsage: async (
-    id: string,
-    type: "basic" | "advanced" | "images",
+    user_id: string,
+    type: "gen_image_usage" | "basic_usage" | "advanced_usage",
     amount: number = 1
   ) => {
-    const updateField: Record<string, number> = {};
-    const usageType = type === "images" ? "gen_image_usage" : `${type}_usage`;
-    updateField[usageType] = amount;
-    
     return supabase.rpc('increment_usage', {
-      usage_id: id,
+      user_id: user_id,
       usage_type: type,
       increment_amount: amount
     });
-  },
-
-  resetUsage: async (id: string) => {
-    return supabase
-      .from("usage")
-      .update({
-        basic_usage: 0,
-        advanced_usage: 0,
-        gen_image_usage: 0,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .select()
-      .single();
-  },
-
-  deleteUsage: async (id: string) => {
-    return supabase.from("usage").delete().eq("id", id);
-  },
+  }
 };

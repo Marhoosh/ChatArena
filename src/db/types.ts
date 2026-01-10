@@ -126,8 +126,8 @@ export type Database = {
     Functions: {
       increment_usage: {
         Args: {
-          usage_id: string
-          usage_type: "basic" | "advanced" | "images"
+          user_id: string
+          usage_type: "gen_image_usage" | "basic_usage" | "advanced_usage"
           increment_amount: number
         }
         Returns: void
