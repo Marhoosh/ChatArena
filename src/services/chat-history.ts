@@ -1,73 +1,125 @@
-import { zip } from 'lodash-es'
-import Browser from '~services/extension-polyfill'
 import { BotId } from '~app/bots'
 import { ChatMessageModel } from '~types'
+import { conversationsService, messagesService } from '~db/services'
+import { getCurrentUserId } from '~db/utils/helpers'
+import { Message, Conversation } from '~db/services'
 
-/**
- * conversations:$botId => Conversation[]
- * conversation:$botId:$cid:messages => ChatMessageModel[]
- */
-
-interface Conversation {
-  id: string
-  createdAt: number
+interface ConversationWithMessages extends Conversation {
+  messages: ChatMessageModel[]
 }
 
-type ConversationWithMessages = Conversation & { messages: ChatMessageModel[] }
+async function getCurrentUserOrThrow(): Promise<string> {
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    throw new Error('User not authenticated')
+  }
+  return userId
+}
+
+function convertToChatMessageModel(message: Message): ChatMessageModel {
+  return {
+    id: message.id,
+    author: message.author as BotId | 'user',
+    text: message.text,
+  }
+}
+
+function convertToMessage(chatMessage: ChatMessageModel, conversationId: string): Message {
+  return {
+    id: chatMessage.id,
+    conversationId,
+    author: chatMessage.author,
+    text: chatMessage.text,
+    imageUrl: null,
+    errorCode: null,
+    errorMessage: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+}
 
 async function loadHistoryConversations(botId: BotId): Promise<Conversation[]> {
-  const key = `conversations:${botId}`
-  const { [key]: value } = await Browser.storage.local.get(key)
-  return value || []
+  const userId = await getCurrentUserOrThrow()
+  const { conversations, error } = await conversationsService.getConversationsByBotId(botId, userId)
+  if (error) {
+    throw error
+  }
+  return conversations || []
 }
 
 async function deleteHistoryConversation(botId: BotId, cid: string) {
-  const conversations = await loadHistoryConversations(botId)
-  const newConversations = conversations.filter((c) => c.id !== cid)
-  await Browser.storage.local.set({ [`conversations:${botId}`]: newConversations })
+  const userId = await getCurrentUserOrThrow()
+  await messagesService.deleteMessagesByConversationId(cid)
+  await conversationsService.deleteConversation(cid)
 }
 
 async function loadConversationMessages(botId: BotId, cid: string): Promise<ChatMessageModel[]> {
-  const key = `conversation:${botId}:${cid}:messages`
-  const { [key]: value } = await Browser.storage.local.get(key)
-  return value || []
+  const { messages, error } = await messagesService.getMessagesByConversationId(cid)
+  if (error) {
+    throw error
+  }
+  return messages ? messages.map(convertToChatMessageModel) : []
 }
 
 export async function setConversationMessages(botId: BotId, cid: string, messages: ChatMessageModel[]) {
-  const conversations = await loadHistoryConversations(botId)
-  if (!conversations.some((c) => c.id === cid)) {
-    conversations.unshift({ id: cid, createdAt: Date.now() })
-    await Browser.storage.local.set({ [`conversations:${botId}`]: conversations })
+  const userId = await getCurrentUserOrThrow()
+  const { conversations } = await conversationsService.getConversationsByBotId(botId, userId)
+  const existingConversation = conversations?.find((c) => c.id === cid)
+
+  if (!existingConversation) {
+    await conversationsService.createConversation({
+      id: cid,
+      botId,
+      userId,
+      title: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+  } else {
+    await conversationsService.updateConversation(cid, {
+      updatedAt: new Date().toISOString(),
+    })
   }
-  const key = `conversation:${botId}:${cid}:messages`
-  await Browser.storage.local.set({ [key]: messages })
+
+  const { messages: existingMessages } = await messagesService.getMessagesByConversationId(cid)
+  const existingMessageIds = new Set(existingMessages?.map((m) => m.id) || [])
+
+  const newMessages = messages.filter((m) => !existingMessageIds.has(m.id))
+  if (newMessages.length > 0) {
+    await messagesService.createMessages(newMessages.map((m) => convertToMessage(m, cid)))
+  }
 }
 
 export async function loadHistoryMessages(botId: BotId): Promise<ConversationWithMessages[]> {
   const conversations = await loadHistoryConversations(botId)
-  const messagesList = await Promise.all(conversations.map((c) => loadConversationMessages(botId, c.id)))
-  return zip(conversations, messagesList).map(([c, messages]) => ({
-    id: c!.id,
-    createdAt: c!.createdAt,
-    messages: messages!,
-  }))
+  const results: ConversationWithMessages[] = []
+
+  for (const conversation of conversations) {
+    const messages = await loadConversationMessages(botId, conversation.id)
+    results.push({
+      ...conversation,
+      messages,
+    })
+  }
+
+  return results
 }
 
 export async function deleteHistoryMessage(botId: BotId, conversationId: string, messageId: string) {
-  const messages = await loadConversationMessages(botId, conversationId)
-  const newMessages = messages.filter((m) => m.id !== messageId)
-  await setConversationMessages(botId, conversationId, newMessages)
-  if (!newMessages.length) {
+  await messagesService.deleteMessage(messageId)
+  const { messages } = await messagesService.getMessagesByConversationId(conversationId)
+  if (!messages || messages.length === 0) {
     await deleteHistoryConversation(botId, conversationId)
   }
 }
 
 export async function clearHistoryMessages(botId: BotId) {
-  const conversations = await loadHistoryConversations(botId)
-  await Promise.all(
-    conversations.map((c) => {
-      return Browser.storage.local.remove(`conversation:${botId}:${c.id}:messages`)
-    }),
-  )
-  await Browser.storage.local.remove(`conversations:${botId}`)
+  const userId = await getCurrentUserOrThrow()
+  const { conversations } = await conversationsService.getConversationsByBotId(botId, userId)
+  if (conversations) {
+    await Promise.all(
+      conversations.map((c) => messagesService.deleteMessagesByConversationId(c.id))
+    )
+    await conversationsService.deleteConversationsByBotId(botId, userId)
+  }
 }
