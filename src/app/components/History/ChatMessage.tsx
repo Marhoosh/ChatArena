@@ -4,7 +4,7 @@ import { FiTrash2 } from 'react-icons/fi'
 import { useSWRConfig } from 'swr'
 import { CHATBOTS } from '~/app/consts'
 import { BotId } from '~app/bots'
-import { deleteHistoryMessage } from '~services/chat-history'
+import { deleteHistoryMessage } from '~services/chat-history-db'
 import { ChatMessageModel } from '~types'
 import Markdown from '../Markdown'
 
