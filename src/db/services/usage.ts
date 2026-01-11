@@ -1,6 +1,7 @@
 import { usageQueries, usageMutations } from "../api";
 import { Database } from "../types";
 import { toCamelCaseObject, toSnakeCaseObject } from "../utils";
+import { handleDatabaseError } from "../utils/helpers";
 
 type UsageRow = Database["public"]["Tables"]["usage"]["Row"];
 
@@ -24,7 +25,7 @@ export class UsageService {
 
       return {
         usage: data ? toCamelCaseObject<UsageStats>(data) : null,
-        error: error ? new Error(error.message) : null,
+        error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
       return {
@@ -45,7 +46,7 @@ export class UsageService {
       
       return {
         success: !incrementError,
-        error: incrementError ? new Error(incrementError.message) : null,
+        error: incrementError ? handleDatabaseError(incrementError) : null,
       };
     } catch (error) {
       return {

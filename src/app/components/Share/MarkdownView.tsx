@@ -1,10 +1,10 @@
 import { FC, useCallback, useMemo, useState } from 'react'
 import { trackEvent } from '~app/plausible'
-import { ChatMessageModel } from '~types'
+import { MessageModel } from '~types'
 import Button from '../Button'
 
 interface Props {
-  messages: ChatMessageModel[]
+  messages: MessageModel[]
 }
 
 const MarkdownView: FC<Props> = ({ messages }) => {

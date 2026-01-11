@@ -1,12 +1,12 @@
 import { FC, useCallback, useState } from 'react'
 import { trackEvent } from '~app/plausible'
-import { ChatMessageModel } from '~types'
+import { MessageModel } from '~types'
 import Button from '../Button'
 import { Input } from '../Input'
 import { uploadToShareGPT } from './sharegpt'
 
 interface Props {
-  messages: ChatMessageModel[]
+  messages: MessageModel[]
 }
 
 const ShareGPTView: FC<Props> = ({ messages }) => {

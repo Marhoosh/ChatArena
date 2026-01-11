@@ -35,6 +35,14 @@ export const getCurrentUser = async (): Promise<User | null> => {
   }
 };
 
+export const getCurrentUserOrThrow = async (): Promise<string> => {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+  return userId;
+};
+
 export const generateConversationTitle = (firstMessage: string): string => {
   const maxLength = 50;
   const title = firstMessage.trim();

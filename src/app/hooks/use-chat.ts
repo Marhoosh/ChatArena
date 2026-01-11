@@ -4,7 +4,7 @@ import { trackEvent } from '~app/plausible'
 import { chatFamily } from '~app/state'
 import { compressImageFile } from '~app/utils/image-compression'
 import { setConversationMessages } from '~services/chat-history'
-import { ChatMessageModel } from '~types'
+import { MessageModel } from '~types'
 import { uuid } from '~utils'
 import { ChatError } from '~utils/errors'
 import { BotId } from '../bots'
@@ -14,7 +14,7 @@ export function useChat(botId: BotId) {
   const [chatState, setChatState] = useAtom(chatAtom)
 
   const updateMessage = useCallback(
-    (messageId: string, updater: (message: ChatMessageModel) => void) => {
+    (messageId: string, updater: (message: MessageModel) => void) => {
       setChatState((draft) => {
         const message = draft.messages.find((m) => m.id === messageId)
         if (message) {

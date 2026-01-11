@@ -5,7 +5,7 @@ import { ViewportList } from 'react-viewport-list'
 import useSWR from 'swr'
 import { BotId } from '~app/bots'
 import { loadHistoryMessages } from '~services/chat-history'
-import { ChatMessageModel } from '~types'
+import { MessageModel } from '~types'
 import { formatTime } from '~utils/format'
 import ChatMessage from './ChatMessage'
 
@@ -16,7 +16,7 @@ type ViewportListItem =
     }
   | {
       type: 'message'
-      message: ChatMessageModel
+      message: MessageModel
       conversationId: string
     }
 
@@ -48,7 +48,7 @@ const HistoryContent: FC<{ botId: BotId; keyword: string }> = ({ botId, keyword 
       if (!messages.length) {
         continue
       }
-      results.push({ type: 'conversation', createdAt: c.createdAt })
+      results.push({ type: 'conversation', createdAt: new Date(c.createdAt).getTime() })
       for (const m of messages) {
         results.push({ type: 'message', message: m, conversationId: c.id })
       }

@@ -2,6 +2,9 @@ import { conversationsQueries, conversationsMutations } from "../api";
 import { Database } from "../types";
 import { toCamelCaseObject, toSnakeCaseObject } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
+import { MessageModel } from "~types";
+import { Message } from "./messages";
+import { BotId } from "~app/bots";
 
 type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
 
@@ -117,3 +120,26 @@ export class ConversationsService {
 }
 
 export const conversationsService = new ConversationsService();
+
+// Conversion functions between database Message and application MessageModel
+export function messageToModel(message: Message): MessageModel {
+  return {
+    id: message.id,
+    author: message.author as BotId | 'user',
+    text: message.text,
+  };
+}
+
+export function modelToMessage(model: MessageModel, conversationId: string): Message {
+  return {
+    id: model.id,
+    conversationId,
+    author: model.author,
+    text: model.text,
+    imageUrl: null,
+    errorCode: null,
+    errorMessage: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}

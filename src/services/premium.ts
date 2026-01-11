@@ -23,7 +23,7 @@ export async function validatePremium() {
   if (!activation) {
     return { valid: false }
   }
-  return lemonsqueezy.validateLicense(activation.licenseKey, activation.instanceId)
+  return lemonsqueezy.validateLicense(activation?.licenseKey || '', activation?.instanceId || '')
 }
 
 export async function deactivatePremium() {
