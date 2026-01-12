@@ -3,7 +3,7 @@ import { FC, memo, useEffect, useMemo, useState } from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { IoCheckmarkSharp, IoCopyOutline } from 'react-icons/io5'
 import { BeatLoader } from 'react-spinners'
-import { Message } from '~/types'
+import { MessageModel } from '~/types'
 import Markdown from '../Markdown'
 import ErrorAction from './ErrorAction'
 import MessageBubble from './MessageBubble'
@@ -11,7 +11,7 @@ import MessageBubble from './MessageBubble'
 const COPY_ICON_CLASS = 'self-top cursor-pointer invisible group-hover:visible mt-[12px] text-primary-text'
 
 interface Props {
-  message: Message
+  message: MessageModel
   className?: string
 }
 

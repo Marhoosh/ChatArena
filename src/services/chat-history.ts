@@ -1,11 +1,11 @@
 import { BotId } from '~app/bots'
-import { Message, Conversation } from '~types'
+import { MessageModel, ConversationModel } from '~types'
 import { conversationsService, messagesService } from '~db/services'
 import { messageToModel, modelToMessage } from '~db/services/conversations'
 import { getCurrentUserOrThrow } from '~db/utils/helpers'
-import { Message as DBMessage } from '~db/services/messages'
+import { MessageModel as DBMessage } from '~db/services/messages'
 
-async function loadHistoryConversations(botId: BotId): Promise<Conversation[]> {
+async function loadHistoryConversations(botId: BotId): Promise<ConversationModel[]> {
   const userId = await getCurrentUserOrThrow()
   const { conversations, error } = await conversationsService.getConversationsByBotId(botId, userId)
   if (error) {
@@ -20,7 +20,7 @@ async function deleteHistoryConversation(cid: string) {
   await conversationsService.deleteConversation(cid)
 }
 
-async function loadConversationMessages(botId: BotId, cid: string): Promise<Message[]> {
+async function loadConversationMessages(botId: BotId, cid: string): Promise<MessageModel[]> {
   const { messages, error } = await messagesService.getMessagesByConversationId(cid)
   if (error) {
     throw error
@@ -28,7 +28,7 @@ async function loadConversationMessages(botId: BotId, cid: string): Promise<Mess
   return messages || []
 }
 
-export async function setConversationMessages(botId: BotId, cid: string, messages: Message[]) {
+export async function setConversationMessages(botId: BotId, cid: string, messages: MessageModel[]) {
   const userId = await getCurrentUserOrThrow()
   const { conversations } = await conversationsService.getConversationsByBotId(botId, userId)
   const existingConversation = conversations?.find((c) => c.id === cid)
@@ -57,9 +57,9 @@ export async function setConversationMessages(botId: BotId, cid: string, message
   }
 }
 
-export async function loadHistoryMessages(botId: BotId): Promise<Conversation[]> {
+export async function loadHistoryMessages(botId: BotId): Promise<ConversationModel[]> {
   const conversations = await loadHistoryConversations(botId)
-  const results: Conversation[] = []
+  const results: ConversationModel[] = []
 
   for (const conversation of conversations) {
     const messages = await loadConversationMessages(botId, conversation.id)

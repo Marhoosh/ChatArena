@@ -2,14 +2,14 @@ import { conversationsQueries, conversationsMutations } from "../api";
 import { Database } from "../types";
 import { conversationRowToModel, conversationModelToRow } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
-import { Message, Conversation } from "~types";
-import { Message as DBMessage } from "./messages";
+import { MessageModel, ConversationModel } from "~types";
+import { MessageModel as DBMessage } from "./messages";
 import { BotId } from "~app/bots";
 
 type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
 
 export class ConversationsService {
-  async getConversationsByBotId(botId: string, userId: string): Promise<{ conversations: Conversation[] | null; error: Error | null }> {
+  async getConversationsByBotId(botId: string, userId: string): Promise<{ conversations: ConversationModel[] | null; error: Error | null }> {
     try {
       const { data, error } = await conversationsQueries.getConversationsByBotId(botId, userId);
 
@@ -25,7 +25,7 @@ export class ConversationsService {
     }
   }
 
-  async getConversationById(id: string): Promise<{ conversation: Conversation | null; error: Error | null }> {
+  async getConversationById(id: string): Promise<{ conversation: ConversationModel | null; error: Error | null }> {
     try {
       const { data, error } = await conversationsQueries.getConversationById(id);
 
@@ -41,7 +41,7 @@ export class ConversationsService {
     }
   }
 
-  async createConversation(conversation: Conversation): Promise<{ conversation: Conversation | null; error: Error | null }> {
+  async createConversation(conversation: ConversationModel): Promise<{ conversation: ConversationModel | null; error: Error | null }> {
     try {
       const { data, error } = await conversationsMutations.insertConversation(conversationModelToRow(conversation));
 
@@ -57,7 +57,7 @@ export class ConversationsService {
     }
   }
 
-  async updateConversation(id: string, updates: Partial<Conversation>): Promise<{ conversation: Conversation | null; error: Error | null }> {
+  async updateConversation(id: string, updates: Partial<ConversationModel>): Promise<{ conversation: ConversationModel | null; error: Error | null }> {
     try {
       const { data, error } = await conversationsMutations.updateConversation(id, conversationModelToRow(updates));
 
@@ -73,7 +73,7 @@ export class ConversationsService {
     }
   }
 
-  async updateConversationTitle(id: string, title: string): Promise<{ conversation: Conversation | null; error: Error | null }> {
+  async updateConversationTitle(id: string, title: string): Promise<{ conversation: ConversationModel | null; error: Error | null }> {
     return this.updateConversation(id, { title });
   }
 
@@ -113,7 +113,7 @@ export class ConversationsService {
 export const conversationsService = new ConversationsService();
 
 // Conversion functions between database Message and application Message
-export function messageToModel(message: DBMessage): Message {
+export function messageToModel(message: DBMessage): MessageModel {
   return {
     id: message.id,
     author: message.author as BotId | 'user',
@@ -125,7 +125,7 @@ export function messageToModel(message: DBMessage): Message {
   };
 }
 
-export function modelToMessage(model: Message, conversationId: string): DBMessage {
+export function modelToMessage(model: MessageModel, conversationId: string): DBMessage {
   return {
     id: model.id,
     conversationId,

@@ -1,4 +1,4 @@
-import { Conversation, Message } from "~types";
+import { ConversationModel, MessageModel } from "~types";
 import { ChatError } from "~utils/errors";
 import { BotId } from "~app/bots";
 import { Database } from "../types";
@@ -7,7 +7,7 @@ type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
 type MessageRow = Database["public"]["Tables"]["messages"]["Row"];
 
 // Conversation conversion functions
-export function conversationRowToModel(row: ConversationRow): Conversation {
+export function conversationRowToModel(row: ConversationRow): ConversationModel {
   return {
     id: row.id,
     botId: row.bot_id,
@@ -18,7 +18,7 @@ export function conversationRowToModel(row: ConversationRow): Conversation {
   };
 }
 
-export function conversationModelToRow(model: Partial<Conversation>): Omit<ConversationRow, 'created_at' | 'updated_at'> {
+export function conversationModelToRow(model: Partial<ConversationModel>): Omit<ConversationRow, 'created_at' | 'updated_at'> {
   return {
     id: model.id!,
     bot_id: model.botId!,
@@ -28,8 +28,8 @@ export function conversationModelToRow(model: Partial<Conversation>): Omit<Conve
 }
 
 // Message conversion functions
-export function messageRowToModel(row: MessageRow): Message {
-  const result: Message = {
+export function messageRowToModel(row: MessageRow): MessageModel {
+  const result: MessageModel = {
     id: row.id,
     author: row.author as BotId | 'user',
     text: row.text,
@@ -50,7 +50,7 @@ export function messageRowToModel(row: MessageRow): Message {
   return result;
 }
 
-export function messageModelToRow(model: Partial<Message>, conversationId?: string): Omit<MessageRow, 'created_at' | 'updated_at'> {
+export function messageModelToRow(model: Partial<MessageModel>, conversationId?: string): Omit<MessageRow, 'created_at' | 'updated_at'> {
   const result: Omit<MessageRow, 'created_at' | 'updated_at'> = {
     id: model.id!,
     author: model.author!,
@@ -68,22 +68,4 @@ export function messageModelToRow(model: Partial<Message>, conversationId?: stri
   }
 
   return result;
-}
-
-// Helper function to convert Message with image Blob to database format
-export function messageWithImageToModel(model: Message): Message {
-  // Create a copy of the model without the image Blob for database storage
-  const { image, ...rest } = model;
-  return {
-    ...rest,
-    imageUrl: null, // Will be set separately if image is uploaded
-  };
-}
-
-// Helper function to convert database Message to Message with image Blob
-export function messageToModelWithImage(model: Message, image?: Blob): Message {
-  return {
-    ...model,
-    image,
-  };
 }

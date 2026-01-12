@@ -2,12 +2,12 @@ import { FC } from 'react'
 import { cx } from '~/utils'
 import ScrollToBottom from 'react-scroll-to-bottom'
 import { BotId } from '~app/bots'
-import { Message } from '~types'
+import { MessageModel } from '~types'
 import ChatMessageCard from './ChatMessageCard'
 
 interface Props {
   botId: BotId
-  messages: Message[]
+  messages: MessageModel[]
   className?: string
 }
 

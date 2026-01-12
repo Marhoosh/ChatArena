@@ -2,12 +2,12 @@ import { messagesQueries, messagesMutations } from "../api";
 import { Database } from "../types";
 import { messageRowToModel, messageModelToRow } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
-import { Message } from "~types";
+import { MessageModel } from "~types";
 
 type MessageRow = Database["public"]["Tables"]["messages"]["Row"];
 
 export class MessagesService {
-  async getMessagesByConversationId(conversationId: string): Promise<{ messages: Message[] | null; error: Error | null }> {
+  async getMessagesByConversationId(conversationId: string): Promise<{ messages: MessageModel[] | null; error: Error | null }> {
     try {
       const { data, error } = await messagesQueries.getMessagesByConversationId(conversationId);
 
@@ -23,7 +23,7 @@ export class MessagesService {
     }
   }
 
-  async getMessageById(id: string): Promise<{ message: Message | null; error: Error | null }> {
+  async getMessageById(id: string): Promise<{ message: MessageModel | null; error: Error | null }> {
     try {
       const { data, error } = await messagesQueries.getMessageById(id);
 
@@ -39,7 +39,7 @@ export class MessagesService {
     }
   }
 
-  async createMessage(message: Message): Promise<{ message: Message | null; error: Error | null }> {
+  async createMessage(message: MessageModel): Promise<{ message: MessageModel | null; error: Error | null }> {
     try {
       const { data, error } = await messagesMutations.insertMessage(messageModelToRow(message));
 
@@ -55,7 +55,7 @@ export class MessagesService {
     }
   }
 
-  async createMessages(messages: Message[]): Promise<{ messages: Message[] | null; error: Error | null }> {
+  async createMessages(messages: MessageModel[]): Promise<{ messages: MessageModel[] | null; error: Error | null }> {
     try {
       const { data, error } = await messagesMutations.insertMessages(messages.map((m) => messageModelToRow(m)));
 
@@ -71,7 +71,7 @@ export class MessagesService {
     }
   }
 
-  async updateMessage(id: string, updates: Partial<Message>): Promise<{ message: Message | null; error: Error | null }> {
+  async updateMessage(id: string, updates: Partial<MessageModel>): Promise<{ message: MessageModel | null; error: Error | null }> {
     try {
       const { data, error } = await messagesMutations.updateMessage(id, messageModelToRow(updates));
 

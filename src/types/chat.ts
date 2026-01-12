@@ -1,7 +1,7 @@
 import { BotId } from '~app/bots'
 import { ChatError } from '~utils/errors'
 
-export interface Message {
+export interface MessageModel {
   id: string
   author: BotId | 'user'
   text: string
@@ -15,12 +15,12 @@ export interface Message {
   updatedAt?: string
 }
 
-export interface Conversation {
+export interface ConversationModel {
   id: string;
   botId: string;
   userId: string | null;
   title: string | null;
   createdAt: string;
   updatedAt: string;
-  messages?: Message[];
+  messages?: MessageModel[];
 }
