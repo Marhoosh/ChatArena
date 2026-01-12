@@ -2,29 +2,17 @@ import { usageQueries, usageMutations } from "../api";
 import { Database } from "../types";
 import { toCamelCaseObject, toSnakeCaseObject } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
+import { UsageModel } from "../../types/usage";
 
 type UsageRow = Database["public"]["Tables"]["usage"]["Row"];
 
-export interface UsageStats {
-  id: string;
-  userId: string;
-  basicUsage: number;
-  basicLimit: number;
-  advancedUsage: number;
-  advancedLimit: number;
-  genImageUsage: number;
-  genImageLimit: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export class UsageService {
-  async getUserUsage(userId: string): Promise<{ usage: UsageStats | null; error: Error | null }> {
+  async getUserUsage(userId: string): Promise<{ usage: UsageModel | null; error: Error | null }> {
     try {
       const { data, error } = await usageQueries.getUserUsage(userId);
 
       return {
-        usage: data ? toCamelCaseObject<UsageStats>(data) : null,
+        usage: data ? toCamelCaseObject<UsageModel>(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {

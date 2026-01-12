@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSession } from "../session/SessionContext";
-import { usageService, UsageStats } from "../../../db/services/usage";
+import { usageService } from "../../../db/services/usage";
+import { UsageModel } from "../../../types/usage";
 import { useTranslation } from "react-i18next";
 
 
 export default function UsageModal() {
     const { t } = useTranslation()
     const { session } = useSession();
-    const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
+    const [usageStats, setUsageStats] = useState<UsageModel | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
