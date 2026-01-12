@@ -1,21 +1,10 @@
 import { messagesQueries, messagesMutations } from "../api";
 import { Database } from "../types";
-import { toCamelCaseObject, toSnakeCaseObject } from "../utils";
+import { messageRowToModel, messageModelToRow } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
+import { Message } from "~types";
 
 type MessageRow = Database["public"]["Tables"]["messages"]["Row"];
-
-export interface Message {
-  id: string;
-  conversationId: string;
-  author: string;
-  text: string;
-  imageUrl: string | null;
-  errorCode: string | null;
-  errorMessage: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export class MessagesService {
   async getMessagesByConversationId(conversationId: string): Promise<{ messages: Message[] | null; error: Error | null }> {
@@ -23,7 +12,7 @@ export class MessagesService {
       const { data, error } = await messagesQueries.getMessagesByConversationId(conversationId);
 
       return {
-        messages: data ? data.map((item) => toCamelCaseObject<Message>(item)) : null,
+        messages: data ? data.map(messageRowToModel) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -39,7 +28,7 @@ export class MessagesService {
       const { data, error } = await messagesQueries.getMessageById(id);
 
       return {
-        message: data ? toCamelCaseObject<Message>(data) : null,
+        message: data ? messageRowToModel(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -52,10 +41,10 @@ export class MessagesService {
 
   async createMessage(message: Message): Promise<{ message: Message | null; error: Error | null }> {
     try {
-      const { data, error } = await messagesMutations.insertMessage(toSnakeCaseObject(message));
+      const { data, error } = await messagesMutations.insertMessage(messageModelToRow(message));
 
       return {
-        message: data ? toCamelCaseObject<Message>(data) : null,
+        message: data ? messageRowToModel(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -68,10 +57,10 @@ export class MessagesService {
 
   async createMessages(messages: Message[]): Promise<{ messages: Message[] | null; error: Error | null }> {
     try {
-      const { data, error } = await messagesMutations.insertMessages(messages.map((m) => toSnakeCaseObject(m)));
+      const { data, error } = await messagesMutations.insertMessages(messages.map((m) => messageModelToRow(m)));
 
       return {
-        messages: data ? data.map((item) => toCamelCaseObject<Message>(item)) : null,
+        messages: data ? data.map(messageRowToModel) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -84,10 +73,10 @@ export class MessagesService {
 
   async updateMessage(id: string, updates: Partial<Message>): Promise<{ message: Message | null; error: Error | null }> {
     try {
-      const { data, error } = await messagesMutations.updateMessage(id, toSnakeCaseObject(updates));
+      const { data, error } = await messagesMutations.updateMessage(id, messageModelToRow(updates));
 
       return {
-        message: data ? toCamelCaseObject<Message>(data) : null,
+        message: data ? messageRowToModel(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {

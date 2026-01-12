@@ -8,7 +8,7 @@ import { cx } from '~/utils'
 import { CHATBOTS } from '~app/consts'
 import { ConversationContext, ConversationContextValue } from '~app/context'
 import { trackEvent } from '~app/plausible'
-import { MessageModel } from '~types'
+import { Message } from '~types'
 import { BotId, BotInstance } from '../../bots'
 import Button from '../Button'
 import HistoryDialog from '../History/Dialog'
@@ -22,7 +22,7 @@ import WebAccessCheckbox from './WebAccessCheckbox'
 interface Props {
   botId: BotId
   bot: BotInstance
-  messages: MessageModel[]
+  messages: Message[]
   onUserSendMessage: (input: string, image?: File) => void
   resetConversation: () => void
   generating: boolean

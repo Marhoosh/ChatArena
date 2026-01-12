@@ -5,7 +5,7 @@ import { ViewportList } from 'react-viewport-list'
 import useSWR from 'swr'
 import { BotId } from '~app/bots'
 import { loadHistoryMessages } from '~services/chat-history'
-import { MessageModel } from '~types'
+import { Message } from '~types'
 import { formatTime } from '~utils/format'
 import ChatMessage from './ChatMessage'
 
@@ -16,7 +16,7 @@ type ViewportListItem =
     }
   | {
       type: 'message'
-      message: MessageModel
+      message: Message
       conversationId: string
     }
 

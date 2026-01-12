@@ -1,21 +1,12 @@
 import { conversationsQueries, conversationsMutations } from "../api";
 import { Database } from "../types";
-import { toCamelCaseObject, toSnakeCaseObject } from "../utils";
+import { conversationRowToModel, conversationModelToRow } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
-import { MessageModel } from "~types";
-import { Message } from "./messages";
+import { Message, Conversation } from "~types";
+import { Message as DBMessage } from "./messages";
 import { BotId } from "~app/bots";
 
 type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
-
-export interface Conversation {
-  id: string;
-  botId: string;
-  userId: string | null;
-  title: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export class ConversationsService {
   async getConversationsByBotId(botId: string, userId: string): Promise<{ conversations: Conversation[] | null; error: Error | null }> {
@@ -23,7 +14,7 @@ export class ConversationsService {
       const { data, error } = await conversationsQueries.getConversationsByBotId(botId, userId);
 
       return {
-        conversations: data ? data.map((item) => toCamelCaseObject<Conversation>(item)) : null,
+        conversations: data ? data.map(conversationRowToModel) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -39,7 +30,7 @@ export class ConversationsService {
       const { data, error } = await conversationsQueries.getConversationById(id);
 
       return {
-        conversation: data ? toCamelCaseObject<Conversation>(data) : null,
+        conversation: data ? conversationRowToModel(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -52,10 +43,10 @@ export class ConversationsService {
 
   async createConversation(conversation: Conversation): Promise<{ conversation: Conversation | null; error: Error | null }> {
     try {
-      const { data, error } = await conversationsMutations.insertConversation(toSnakeCaseObject(conversation));
+      const { data, error } = await conversationsMutations.insertConversation(conversationModelToRow(conversation));
 
       return {
-        conversation: data ? toCamelCaseObject<Conversation>(data) : null,
+        conversation: data ? conversationRowToModel(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -68,10 +59,10 @@ export class ConversationsService {
 
   async updateConversation(id: string, updates: Partial<Conversation>): Promise<{ conversation: Conversation | null; error: Error | null }> {
     try {
-      const { data, error } = await conversationsMutations.updateConversation(id, toSnakeCaseObject(updates));
+      const { data, error } = await conversationsMutations.updateConversation(id, conversationModelToRow(updates));
 
       return {
-        conversation: data ? toCamelCaseObject<Conversation>(data) : null,
+        conversation: data ? conversationRowToModel(data) : null,
         error: error ? handleDatabaseError(error) : null,
       };
     } catch (error) {
@@ -121,22 +112,26 @@ export class ConversationsService {
 
 export const conversationsService = new ConversationsService();
 
-// Conversion functions between database Message and application MessageModel
-export function messageToModel(message: Message): MessageModel {
+// Conversion functions between database Message and application Message
+export function messageToModel(message: DBMessage): Message {
   return {
     id: message.id,
     author: message.author as BotId | 'user',
     text: message.text,
+    imageUrl: message.imageUrl,
+    conversationId: message.conversationId,
+    createdAt: message.createdAt,
+    updatedAt: message.updatedAt,
   };
 }
 
-export function modelToMessage(model: MessageModel, conversationId: string): Message {
+export function modelToMessage(model: Message, conversationId: string): DBMessage {
   return {
     id: model.id,
     conversationId,
     author: model.author,
     text: model.text,
-    imageUrl: null,
+    imageUrl: model.imageUrl || null,
     errorCode: null,
     errorMessage: null,
     createdAt: new Date().toISOString(),

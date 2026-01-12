@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { cx } from '~/utils'
 import { AiFillCloud, AiFillFileMarkdown } from 'react-icons/ai'
-import { MessageModel } from '~types'
+import { Message } from '~types'
 import Button from '../Button'
 import Dialog from '../Dialog'
 import MarkdownView from './MarkdownView'
@@ -10,7 +10,7 @@ import ShareGPTView from './ShareGPTView'
 interface Props {
   open: boolean
   onClose: () => void
-  messages: MessageModel[]
+  messages: Message[]
 }
 
 const ShareDialog = (props: Props) => {

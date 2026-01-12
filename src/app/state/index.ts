@@ -5,7 +5,7 @@ import { BotId, createBotInstance } from '~app/bots'
 import { FeatureId } from '~app/components/Premium/FeatureList'
 import { getDefaultThemeColor } from '~app/utils/color-scheme'
 import { Campaign } from '~services/server-api'
-import { MessageModel } from '~types'
+import { Message } from '~types'
 import { uuid } from '~utils'
 
 type Param = { botId: BotId; page: string }
@@ -15,7 +15,7 @@ export const chatFamily = atomFamily(
     return atomWithImmer({
       botId: param.botId,
       bot: createBotInstance(param.botId),
-      messages: [] as MessageModel[],
+      messages: [] as Message[],
       generatingMessageId: '',
       abortController: undefined as AbortController | undefined,
       conversationId: uuid(),

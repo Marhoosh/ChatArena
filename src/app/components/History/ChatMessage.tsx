@@ -5,12 +5,12 @@ import { useSWRConfig } from 'swr'
 import { CHATBOTS } from '~/app/consts'
 import { BotId } from '~app/bots'
 import { deleteHistoryMessage } from '~services/chat-history'
-import { MessageModel } from '~types'
+import { Message } from '~types'
 import Markdown from '../Markdown'
 
 interface Props {
   botId: BotId
-  message: MessageModel
+  message: Message
   conversationId: string
 }
 
