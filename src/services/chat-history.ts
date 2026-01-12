@@ -1,9 +1,8 @@
 import { BotId } from '~app/bots'
 import { MessageModel, ConversationModel } from '~types'
 import { conversationsService, messagesService } from '~db/services'
-import { messageToModel, modelToMessage } from '~db/services/conversations'
 import { getCurrentUserOrThrow } from '~db/utils/helpers'
-import { MessageModel as DBMessage } from '~db/services/messages'
+import { messageModelToRow } from '~db/utils/converters'
 
 async function loadHistoryConversations(botId: BotId): Promise<ConversationModel[]> {
   const userId = await getCurrentUserOrThrow()
@@ -53,7 +52,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
 
   const newMessages = messages.filter((m) => !existingMessageIds.has(m.id))
   if (newMessages.length > 0) {
-    await messagesService.createMessages(newMessages.map((m) => modelToMessage(m, cid)))
+    await messagesService.createMessages(newMessages.map((m) => ({ ...m, conversationId: cid })))
   }
 }
 

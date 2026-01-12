@@ -3,7 +3,6 @@ import { Database } from "../types";
 import { conversationRowToModel, conversationModelToRow } from "../utils";
 import { handleDatabaseError } from "../utils/helpers";
 import { MessageModel, ConversationModel } from "~types";
-import { MessageModel as DBMessage } from "./messages";
 import { BotId } from "~app/bots";
 
 type ConversationRow = Database["public"]["Tables"]["conversations"]["Row"];
@@ -111,30 +110,3 @@ export class ConversationsService {
 }
 
 export const conversationsService = new ConversationsService();
-
-// Conversion functions between database Message and application Message
-export function messageToModel(message: DBMessage): MessageModel {
-  return {
-    id: message.id,
-    author: message.author as BotId | 'user',
-    text: message.text,
-    imageUrl: message.imageUrl,
-    conversationId: message.conversationId,
-    createdAt: message.createdAt,
-    updatedAt: message.updatedAt,
-  };
-}
-
-export function modelToMessage(model: MessageModel, conversationId: string): DBMessage {
-  return {
-    id: model.id,
-    conversationId,
-    author: model.author,
-    text: model.text,
-    imageUrl: model.imageUrl || null,
-    errorCode: null,
-    errorMessage: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-}

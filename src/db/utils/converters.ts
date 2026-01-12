@@ -1,5 +1,5 @@
 import { ConversationModel, MessageModel } from "~types";
-import { ChatError } from "~utils/errors";
+import { ChatError, ErrorCode } from "~utils/errors";
 import { BotId } from "~app/bots";
 import { Database } from "../types";
 
@@ -22,8 +22,8 @@ export function conversationModelToRow(model: Partial<ConversationModel>): Omit<
   return {
     id: model.id!,
     bot_id: model.botId!,
-    user_id: model.userId,
-    title: model.title,
+    user_id: model.userId!,
+    title: model.title || '',
   };
 }
 
@@ -41,27 +41,26 @@ export function messageRowToModel(row: MessageRow): MessageModel {
 
   // Convert error fields to ChatError if they exist
   if (row.error_code || row.error_message) {
-    result.error = {
-      code: row.error_code as any,
-      message: row.error_message || '',
+    result.error = new ChatError(
+        row.error_message || '',
+        row.error_code as ErrorCode
+      );
     };
-  }
 
   return result;
 }
 
-export function messageModelToRow(model: Partial<MessageModel>, conversationId?: string): Omit<MessageRow, 'created_at' | 'updated_at'> {
+export function messageModelToRow(model: Partial<MessageModel>): Omit<MessageRow, 'created_at' | 'updated_at'> {
   const result: Omit<MessageRow, 'created_at' | 'updated_at'> = {
     id: model.id!,
     author: model.author!,
     text: model.text!,
-    conversation_id: conversationId || model.conversationId || '',
+    conversation_id: model.conversationId || '',
     image_url: model.imageUrl || null,
     error_code: null,
     error_message: null,
   };
 
-  // Convert ChatError to error fields if it exists
   if (model.error) {
     result.error_code = model.error.code;
     result.error_message = model.error.message;
