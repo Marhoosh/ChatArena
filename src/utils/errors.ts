@@ -26,6 +26,15 @@ export enum ErrorCode {
   PPLX_FORBIDDEN_ERROR = 'PPLX_FORBIDDEN_ERROR',
   TWITTER_UNAUTHORIZED = 'TWITTER_UNAUTHORIZED',
   GROK_UNAVAILABLE = 'GROK_UNAVAILABLE',
+  
+  // 存储相关错误代码
+  FILE_SIZE_EXCEEDED = 'FILE_SIZE_EXCEEDED',
+  UNSUPPORTED_FILE_TYPE = 'UNSUPPORTED_FILE_TYPE',
+  FILE_NOT_FOUND = 'FILE_NOT_FOUND',
+  UPLOAD_FAILED = 'UPLOAD_FAILED',
+  DOWNLOAD_FAILED = 'DOWNLOAD_FAILED',
+  DELETE_FAILED = 'DELETE_FAILED',
+  INVALID_STORAGE_PATH = 'INVALID_STORAGE_PATH',
 }
 
 export class ChatError extends Error {
@@ -33,5 +42,16 @@ export class ChatError extends Error {
   constructor(message: string, code: ErrorCode) {
     super(message)
     this.code = code
+  }
+}
+
+export class StorageError extends Error {
+  code: ErrorCode
+  originalError?: any
+  
+  constructor(message: string, code: ErrorCode, originalError?: any) {
+    super(message)
+    this.code = code
+    this.originalError = originalError
   }
 }
