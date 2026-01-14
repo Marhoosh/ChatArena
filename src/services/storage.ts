@@ -128,13 +128,16 @@ export async function deleteFile(path: string): Promise<StorageResult<void>> {
 }
 
 // 获取公共URL
-export function getPublicUrl(path: string): string | null {
+export async function getSignedUrl(path: string): Promise<string | null> {
   try {
-    const { data } = supabase.storage
+    const { data, error } = await supabase.storage
       .from('test')
-      .getPublicUrl(path)
-      
-    return data.publicUrl
+      .createSignedUrl(path, 60)
+
+    if (error) {
+      throw handleSupabaseError(error, '创建签名URL')
+    }
+    return data?.signedUrl || null
   } catch (error) {
     console.error('获取公共URL失败:', error)
     return null
