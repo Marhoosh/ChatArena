@@ -3,7 +3,7 @@ import useSWR from 'swr'
 import { fetchPurchaseInfo } from '~services/server-api'
 
 export function usePurchaseInfo() {
-  return useSWR('premium-info', fetchPurchaseInfo)
+  return useSWR('premium-info', null)
 }
 
 export function useDiscountCode() {
