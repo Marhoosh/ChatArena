@@ -1,6 +1,6 @@
 import { supabase } from '~db'
 import { ErrorCode, StorageError } from '~utils/errors'
-import { StoragePath, UploadOptions, StorageResult } from './storage/types'
+import { StoragePath, UploadOptions, StorageResult } from '~types/storage'
 
 // 格式化文件大小
 function formatFileSize(bytes: number): string {
