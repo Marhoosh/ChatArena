@@ -1,121 +1,230 @@
 import { messagesQueries, messagesMutations } from "../api";
 import { Database } from "../types";
 import { messageRowToModel, messageModelToRow } from "../utils";
-import { handleDatabaseError } from "../utils/helpers";
+import { ErrorCode, DataBaseError } from "~utils/errors";
+import { Sentry } from "~services/sentry";
 import { MessageModel } from "~types";
 
 type MessageRow = Database["public"]["Tables"]["messages"]["Row"];
 
 export class MessagesService {
-  async getMessagesByConversationId(conversationId: string): Promise<{ messages: MessageModel[] | null; error: Error | null }> {
+  async getMessagesByConversationId(conversationId: string): Promise<MessageModel[]> {
     try {
       const { data, error } = await messagesQueries.getMessagesByConversationId(conversationId);
 
-      return {
-        messages: data ? data.map(messageRowToModel) : null,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `获取对话消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
+
+      return data ? data.map(messageRowToModel) : [];
     } catch (error) {
-      return {
-        messages: null,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `获取对话消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 
-  async getMessageById(id: string): Promise<{ message: MessageModel | null; error: Error | null }> {
+  async getMessageById(id: string): Promise<MessageModel> {
     try {
       const { data, error } = await messagesQueries.getMessageById(id);
 
-      return {
-        message: data ? messageRowToModel(data) : null,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `获取消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
+
+      if (!data) {
+        throw new DataBaseError(
+          '消息不存在',
+          ErrorCode.DATABASE_RECORD_NOT_FOUND
+        );
+      }
+
+      return messageRowToModel(data);
     } catch (error) {
-      return {
-        message: null,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `获取消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 
-  async createMessage(message: MessageModel): Promise<{ message: MessageModel | null; error: Error | null }> {
+  async createMessage(message: MessageModel): Promise<MessageModel> {
     try {
       const { data, error } = await messagesMutations.insertMessage(messageModelToRow(message));
 
-      return {
-        message: data ? messageRowToModel(data) : null,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `创建消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
+
+      if (!data) {
+        throw new DataBaseError(
+          '创建消息失败: 未返回数据',
+          ErrorCode.DATABASE_QUERY_FAILED
+        );
+      }
+
+      return messageRowToModel(data);
     } catch (error) {
-      return {
-        message: null,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `创建消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 
-  async createMessages(messages: MessageModel[]): Promise<{ messages: MessageModel[] | null; error: Error | null }> {
+  async createMessages(messages: MessageModel[]): Promise<MessageModel[]> {
     try {
       const { data, error } = await messagesMutations.insertMessages(messages.map((m) => messageModelToRow(m)));
 
-      return {
-        messages: data ? data.map(messageRowToModel) : null,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `批量创建消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
+
+      if (!data) {
+        throw new DataBaseError(
+          '批量创建消息失败: 未返回数据',
+          ErrorCode.DATABASE_QUERY_FAILED
+        );
+      }
+
+      return data.map(messageRowToModel);
     } catch (error) {
-      return {
-        messages: null,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `批量创建消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 
-  async updateMessage(id: string, updates: Partial<MessageModel>): Promise<{ message: MessageModel | null; error: Error | null }> {
+  async updateMessage(id: string, updates: Partial<MessageModel>): Promise<MessageModel> {
     try {
       const { data, error } = await messagesMutations.updateMessage(id, messageModelToRow(updates));
 
-      return {
-        message: data ? messageRowToModel(data) : null,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `更新消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
+
+      if (!data) {
+        throw new DataBaseError(
+          '更新消息失败: 未返回数据',
+          ErrorCode.DATABASE_QUERY_FAILED
+        );
+      }
+
+      return messageRowToModel(data);
     } catch (error) {
-      return {
-        message: null,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `更新消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 
-  async deleteMessage(id: string): Promise<{ success: boolean; error: Error | null }> {
+  async deleteMessage(id: string): Promise<void> {
     try {
       const { error } = await messagesMutations.deleteMessage(id);
 
-      return {
-        success: !error,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `删除消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
     } catch (error) {
-      return {
-        success: false,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `删除消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 
-  async deleteMessagesByConversationId(conversationId: string): Promise<{ success: boolean; error: Error | null }> {
+  async deleteMessagesByConversationId(conversationId: string): Promise<void> {
     try {
       const { error } = await messagesMutations.deleteMessagesByConversationId(conversationId);
 
-      return {
-        success: !error,
-        error: error ? handleDatabaseError(error) : null,
-      };
+      if (error) {
+        throw new DataBaseError(
+          `删除对话消息失败: ${error.message || '未知错误'}`,
+          ErrorCode.DATABASE_QUERY_FAILED,
+          error
+        );
+      }
     } catch (error) {
-      return {
-        success: false,
-        error: error as Error,
-      };
+      if (error instanceof DataBaseError) {
+        Sentry.captureException(error);
+        throw error;
+      }
+      const dbError = new DataBaseError(
+        `删除对话消息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        ErrorCode.DATABASE_QUERY_FAILED,
+        error
+      );
+      Sentry.captureException(dbError);
+      throw dbError;
     }
   }
 }

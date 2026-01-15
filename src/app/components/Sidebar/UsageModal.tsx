@@ -3,6 +3,7 @@ import { useSession } from "../session/SessionContext";
 import { usageService } from "../../../db/services/usage";
 import { UsageModel } from "../../../types/usage";
 import { useTranslation } from "react-i18next";
+import { Sentry } from "~services/sentry";
 
 
 export default function UsageModal() {
@@ -18,14 +19,10 @@ export default function UsageModal() {
             
             try {
                 setLoading(true);
-                const { usage, error } = await usageService.getUserUsage(session.user.id);
-                
-                if (error) {
-                    setError(error.message);
-                } else {
-                    setUsageStats(usage);
-                }
+                const usage = await usageService.getUserUsage(session.user.id);
+                setUsageStats(usage);
             } catch (err) {
+                Sentry.captureException(err);
                 setError(err instanceof Error ? err.message : 'Failed to fetch usage data');
             } finally {
                 setLoading(false);

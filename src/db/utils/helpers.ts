@@ -1,13 +1,6 @@
 import { supabase } from "../client";
 import { User } from "@supabase/supabase-js";
 
-export const handleDatabaseError = (error: any): Error => {
-  if (error?.message) {
-    return new Error(error.message);
-  }
-  return new Error("An unknown database error occurred");
-};
-
 export const isUserAuthenticated = async (): Promise<boolean> => {
   try {
     const { data } = await supabase.auth.getSession();

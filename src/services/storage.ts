@@ -1,8 +1,8 @@
 import { supabase } from '~db'
 import { ErrorCode, StorageError } from '~utils/errors'
-import { StoragePath, UploadOptions, StorageResult } from '~types/storage'
+import { Sentry } from '~services/sentry'
+import { StoragePath, UploadOptions } from '~types/storage'
 
-// 格式化文件大小
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
@@ -11,7 +11,6 @@ function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 生成唯一文件名
 function generateFileName(file: File, prefix?: string): string {
   const timestamp = Date.now()
   const randomStr = Math.random().toString(36).substring(2, 8)
@@ -20,7 +19,6 @@ function generateFileName(file: File, prefix?: string): string {
   return `${baseName}${timestamp}_${randomStr}.${extension}`
 }
 
-// 验证文件
 function validateFile(file: File, options?: UploadOptions): void {
   if (options?.maxSize && file.size > options.maxSize) {
     throw new StorageError(
@@ -37,25 +35,13 @@ function validateFile(file: File, options?: UploadOptions): void {
   }
 }
 
-// 处理Supabase错误
-function handleSupabaseError(error: any, context: string): StorageError {
-  return new StorageError(
-    `${context}失败: ${error.message || '未知错误'}`,
-    ErrorCode.UPLOAD_FAILED,
-    error
-  )
-}
-
-// 上传文件到指定路径
 export async function uploadFile(
   file: File, 
   path: StoragePath, 
   options?: UploadOptions
 ): Promise<string> {
-  // 验证文件
   validateFile(file, options)
   
-  // 生成文件名
   const fileName = options?.generateUniqueName !== false 
     ? generateFileName(file) 
     : file.name
@@ -64,7 +50,7 @@ export async function uploadFile(
   
   try {
     const { error: uploadError } = await supabase.storage
-      .from('test') // 使用您的存储桶名称
+      .from('test')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false,
@@ -72,19 +58,29 @@ export async function uploadFile(
       })
       
     if (uploadError) {
-      throw handleSupabaseError(uploadError, '文件上传')
+      throw new StorageError(
+        `文件上传失败: ${uploadError.message || '未知错误'}`,
+        ErrorCode.UPLOAD_FAILED,
+        uploadError
+      )
     }
     
     return filePath
   } catch (error) {
     if (error instanceof StorageError) {
+      Sentry.captureException(error)
       throw error
     }
-    throw handleSupabaseError(error, '文件上传')
+    const storageError = new StorageError(
+      `文件上传失败: ${error instanceof Error ? error.message : '未知错误'}`,
+      ErrorCode.UPLOAD_FAILED,
+      error
+    )
+    Sentry.captureException(storageError)
+    throw storageError
   }
 }
 
-// 下载文件
 export async function downloadFile(path: string): Promise<Blob> {
   try {
     const { data, error } = await supabase.storage
@@ -92,57 +88,92 @@ export async function downloadFile(path: string): Promise<Blob> {
       .download(path)
       
     if (error) {
-      throw handleSupabaseError(error, '文件下载')
+      throw new StorageError(
+        `文件下载失败: ${error.message || '未知错误'}`,
+        ErrorCode.DOWNLOAD_FAILED,
+        error
+      )
     }
     
     return data
   } catch (error) {
     if (error instanceof StorageError) {
+      Sentry.captureException(error)
       throw error
     }
-    throw handleSupabaseError(error, '文件下载')
+    const storageError = new StorageError(
+      `文件下载失败: ${error instanceof Error ? error.message : '未知错误'}`,
+      ErrorCode.DOWNLOAD_FAILED,
+      error
+    )
+    Sentry.captureException(storageError)
+    throw storageError
   }
 }
 
-// 删除文件
-export async function deleteFile(path: string): Promise<StorageResult<void>> {
+export async function deleteFile(path: string): Promise<void> {
   try {
     const { error } = await supabase.storage
       .from('test')
       .remove([path])
       
     if (error) {
-      return {
-        success: false,
-        error: handleSupabaseError(error, '文件删除')
-      }
+      throw new StorageError(
+        `文件删除失败: ${error.message || '未知错误'}`,
+        ErrorCode.DELETE_FAILED,
+        error
+      )
     }
-    
-    return { success: true }
   } catch (error) {
-    return {
-      success: false,
-      error: handleSupabaseError(error, '文件删除')
+    if (error instanceof StorageError) {
+      Sentry.captureException(error)
+      throw error
     }
+    const storageError = new StorageError(
+      `文件删除失败: ${error instanceof Error ? error.message : '未知错误'}`,
+      ErrorCode.DELETE_FAILED,
+      error
+    )
+    Sentry.captureException(storageError)
+    throw storageError
   }
 }
 
-// 获取公共URL
-export async function getSignedUrl(path: string): Promise<string | null> {
+export async function getSignedUrl(path: string): Promise<string> {
   try {
     const { data, error } = await supabase.storage
       .from('test')
       .createSignedUrl(path, 60)
 
     if (error) {
-      throw handleSupabaseError(error, '创建签名URL')
+      throw new StorageError(
+        `创建签名URL失败: ${error.message || '未知错误'}`,
+        ErrorCode.INVALID_STORAGE_PATH,
+        error
+      )
     }
-    return data?.signedUrl || null
+    
+    if (!data?.signedUrl) {
+      throw new StorageError(
+        '创建签名URL失败: 未返回有效的URL',
+        ErrorCode.INVALID_STORAGE_PATH
+      )
+    }
+    
+    return data.signedUrl
   } catch (error) {
-    console.error('获取公共URL失败:', error)
-    return null
+    if (error instanceof StorageError) {
+      Sentry.captureException(error)
+      throw error
+    }
+    const storageError = new StorageError(
+      `创建签名URL失败: ${error instanceof Error ? error.message : '未知错误'}`,
+      ErrorCode.INVALID_STORAGE_PATH,
+      error
+    )
+    Sentry.captureException(storageError)
+    throw storageError
   }
 }
 
-// 导出工具函数供外部使用
 export { generateFileName, validateFile, formatFileSize }
