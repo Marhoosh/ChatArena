@@ -35,6 +35,14 @@ export enum ErrorCode {
   DOWNLOAD_FAILED = 'DOWNLOAD_FAILED',
   DELETE_FAILED = 'DELETE_FAILED',
   INVALID_STORAGE_PATH = 'INVALID_STORAGE_PATH',
+
+  // 数据库相关错误代码
+  DATABASE_CONNECTION_FAILED = 'DATABASE_CONNECTION_FAILED',
+  DATABASE_QUERY_FAILED = 'DATABASE_QUERY_FAILED',
+  DATABASE_TRANSACTION_FAILED = 'DATABASE_TRANSACTION_FAILED',
+  DATABASE_RECORD_NOT_FOUND = 'DATABASE_RECORD_NOT_FOUND',
+  DATABASE_DUPLICATE_RECORD = 'DATABASE_DUPLICATE_RECORD',
+  DATABASE_CONSTRAINT_VIOLATION = 'DATABASE_CONSTRAINT_VIOLATION',
 }
 
 export class ChatError extends Error {
@@ -46,6 +54,17 @@ export class ChatError extends Error {
 }
 
 export class StorageError extends Error {
+  code: ErrorCode
+  originalError?: any
+  
+  constructor(message: string, code: ErrorCode, originalError?: any) {
+    super(message)
+    this.code = code
+    this.originalError = originalError
+  }
+}
+
+export class DataBaseError extends Error {
   code: ErrorCode
   originalError?: any
   
