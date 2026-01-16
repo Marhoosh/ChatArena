@@ -2,38 +2,19 @@ import { supabase } from "../client";
 import { User } from "@supabase/supabase-js";
 
 export const isUserAuthenticated = async (): Promise<boolean> => {
-  try {
-    const { data } = await supabase.auth.getSession();
-    return !!data.session;
-  } catch {
-    return false;
-  }
+  const { data } = await supabase.auth.getSession();
+  return !!data.session;
 };
 
 export const getCurrentUserId = async (): Promise<string | null> => {
-  try {
-    const { data } = await supabase.auth.getUser();
-    return data.user?.id || null;
-  } catch {
-    return null;
-  }
+  const { data } = await supabase.auth.getUser();
+  return data.user?.id || null;
 };
 
 export const getCurrentUser = async (): Promise<User | null> => {
-  try {
-    const { data } = await supabase.auth.getUser();
-    return data.user || null;
-  } catch {
-    return null;
-  }
-};
+  const { data } = await supabase.auth.getUser();
+  return data.user || null;
 
-export const getCurrentUserOrThrow = async (): Promise<string> => {
-  const userId = await getCurrentUserId();
-  if (!userId) {
-    throw new Error('User not authenticated');
-  }
-  return userId;
 };
 
 export const generateConversationTitle = (firstMessage: string): string => {

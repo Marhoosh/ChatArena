@@ -1,10 +1,13 @@
 import { BotId } from '~app/bots'
 import { MessageModel, ConversationModel } from '~types'
 import { conversationsService, messagesService } from '~db/services'
-import { getCurrentUserOrThrow } from '~db/utils/helpers'
+import { getCurrentUserId } from '~db/utils/helpers'
 
 async function loadHistoryConversations(botId: BotId): Promise<ConversationModel[] | null> {
-  const userId = await getCurrentUserOrThrow()
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return null
+  }
   return await conversationsService.getConversationsByBotId(botId, userId)
 }
 
@@ -18,7 +21,10 @@ async function loadConversationMessages(botId: BotId, cid: string): Promise<Mess
 }
 
 export async function setConversationMessages(botId: BotId, cid: string, messages: MessageModel[]) {
-  const userId = await getCurrentUserOrThrow()
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return
+  }
   const conversations = await conversationsService.getConversationsByBotId(botId, userId)
   const existingConversation = conversations?.find((c) => c.id === cid) || null
 
@@ -75,7 +81,10 @@ export async function deleteHistoryMessage(botId: BotId, conversationId: string,
 }
 
 export async function clearHistoryMessages(botId: BotId) {
-  const userId = await getCurrentUserOrThrow()
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return
+  }
   const conversations = await conversationsService.getConversationsByBotId(botId, userId) || []
   if (conversations.length > 0) {
     await Promise.all(
