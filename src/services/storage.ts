@@ -1,6 +1,7 @@
 import { supabase } from '~db'
 import { ErrorCode, StorageError } from '~utils/errors'
-import { StoragePath, UploadOptions } from '~types/storage'
+import { StoragePath } from '~types/storage'
+import { UPLOAD_CONFIG } from '~app/config'
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes'
@@ -18,17 +19,17 @@ function generateFileName(file: File, prefix?: string): string {
   return `${baseName}${timestamp}_${randomStr}.${extension}`
 }
 
-function validateFile(file: File, options?: UploadOptions): void {
-  if (options?.maxSize && file.size > options.maxSize) {
+function validateFile(file: File): void {
+  if (file.size > UPLOAD_CONFIG.maxSize) {
     throw new StorageError(
-      `文件大小超过限制。最大允许: ${formatFileSize(options.maxSize)}, 实际大小: ${formatFileSize(file.size)}`,
+      `文件大小超过限制。最大允许: ${formatFileSize(UPLOAD_CONFIG.maxSize)}, 实际大小: ${formatFileSize(file.size)}`,
       ErrorCode.FILE_SIZE_EXCEEDED
     )
   }
   
-  if (options?.allowedTypes && !options.allowedTypes.includes(file.type)) {
+  if (!UPLOAD_CONFIG.allowedTypes.includes(file.type)) {
     throw new StorageError(
-      `不支持的文件类型: ${file.type}。支持的类型: ${options.allowedTypes.join(', ')}`,
+      `不支持的文件类型: ${file.type}。支持的类型: ${UPLOAD_CONFIG.allowedTypes.join(', ')}`,
       ErrorCode.UNSUPPORTED_FILE_TYPE
     )
   }
@@ -36,23 +37,18 @@ function validateFile(file: File, options?: UploadOptions): void {
 
 export async function uploadFile(
   file: File, 
-  path: StoragePath, 
-  options?: UploadOptions
+  path: StoragePath
 ): Promise<string> {
-  validateFile(file, options)
+  validateFile(file)
   
-  const fileName = options?.generateUniqueName !== false 
-    ? generateFileName(file) 
-    : file.name
-  
+  const fileName = generateFileName(file)
   const filePath = `${path}/${fileName}`
   
   await supabase.storage
     .from('test')
     .upload(filePath, file, {
       cacheControl: '3600',
-      upsert: false,
-      metadata: options?.metadata
+      upsert: false
     })
   
   return filePath

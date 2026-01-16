@@ -11,15 +11,3 @@ export enum StoragePath {
   CONTRACTS = 'documents/contracts'
 }
 
-export interface UploadOptions {
-  maxSize?: number; // 字节
-  allowedTypes?: string[]; // MIME类型
-  generateUniqueName?: boolean; // 是否生成唯一文件名
-  metadata?: Record<string, any>; // 额外元数据
-}
-
-export interface StorageResult<T = any> {
-  success: boolean;
-  data?: T;
-  error?: StorageError;
-}
