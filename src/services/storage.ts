@@ -1,6 +1,5 @@
 import { supabase } from '~db'
 import { ErrorCode, StorageError } from '~utils/errors'
-import { Sentry } from '~services/sentry'
 import { StoragePath, UploadOptions } from '~types/storage'
 
 function formatFileSize(bytes: number): string {
@@ -48,132 +47,43 @@ export async function uploadFile(
   
   const filePath = `${path}/${fileName}`
   
-  try {
-    const { error: uploadError } = await supabase.storage
-      .from('test')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-        metadata: options?.metadata
-      })
-      
-    if (uploadError) {
-      throw new StorageError(
-        `文件上传失败: ${uploadError.message || '未知错误'}`,
-        ErrorCode.UPLOAD_FAILED,
-        uploadError
-      )
-    }
-    
-    return filePath
-  } catch (error) {
-    if (error instanceof StorageError) {
-      Sentry.captureException(error)
-      throw error
-    }
-    const storageError = new StorageError(
-      `文件上传失败: ${error instanceof Error ? error.message : '未知错误'}`,
-      ErrorCode.UPLOAD_FAILED,
-      error
-    )
-    Sentry.captureException(storageError)
-    throw storageError
-  }
+  await supabase.storage
+    .from('test')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+      metadata: options?.metadata
+    })
+  
+  return filePath
+
 }
 
-export async function downloadFile(path: string): Promise<Blob> {
-  try {
-    const { data, error } = await supabase.storage
-      .from('test')
-      .download(path)
-      
-    if (error) {
-      throw new StorageError(
-        `文件下载失败: ${error.message || '未知错误'}`,
-        ErrorCode.DOWNLOAD_FAILED,
-        error
-      )
-    }
-    
-    return data
-  } catch (error) {
-    if (error instanceof StorageError) {
-      Sentry.captureException(error)
-      throw error
-    }
-    const storageError = new StorageError(
-      `文件下载失败: ${error instanceof Error ? error.message : '未知错误'}`,
-      ErrorCode.DOWNLOAD_FAILED,
-      error
-    )
-    Sentry.captureException(storageError)
-    throw storageError
-  }
+export async function downloadFile(path: string): Promise<Blob | null> {
+  const { data } = await supabase.storage
+    .from('test')
+    .download(path)
+  
+  return data || null
+
 }
 
 export async function deleteFile(path: string): Promise<void> {
-  try {
-    const { error } = await supabase.storage
-      .from('test')
-      .remove([path])
-      
-    if (error) {
-      throw new StorageError(
-        `文件删除失败: ${error.message || '未知错误'}`,
-        ErrorCode.DELETE_FAILED,
-        error
-      )
-    }
-  } catch (error) {
-    if (error instanceof StorageError) {
-      Sentry.captureException(error)
-      throw error
-    }
-    const storageError = new StorageError(
-      `文件删除失败: ${error instanceof Error ? error.message : '未知错误'}`,
-      ErrorCode.DELETE_FAILED,
-      error
-    )
-    Sentry.captureException(storageError)
-    throw storageError
-  }
+  
+  await supabase.storage
+    .from('test')
+    .remove([path])
+
 }
 
-export async function getSignedUrl(path: string): Promise<string> {
-  try {
-    const { data, error } = await supabase.storage
-      .from('test')
-      .createSignedUrl(path, 60)
+export async function getSignedUrl(path: string): Promise<string | null> {
+  
+  const { data } = await supabase.storage
+    .from('test')
+    .createSignedUrl(path, 60)
+  
+  return data?.signedUrl || null
 
-    if (error) {
-      throw new StorageError(
-        `创建签名URL失败: ${error.message || '未知错误'}`,
-        ErrorCode.INVALID_STORAGE_PATH,
-        error
-      )
-    }
-    
-    if (!data?.signedUrl) {
-      throw new StorageError(
-        '创建签名URL失败: 未返回有效的URL',
-        ErrorCode.INVALID_STORAGE_PATH
-      )
-    }
-    
-    return data.signedUrl
-  } catch (error) {
-    if (error instanceof StorageError) {
-      Sentry.captureException(error)
-      throw error
-    }
-    const storageError = new StorageError(
-      `创建签名URL失败: ${error instanceof Error ? error.message : '未知错误'}`,
-      ErrorCode.INVALID_STORAGE_PATH,
-      error
-    )
-    Sentry.captureException(storageError)
-    throw storageError
-  }
 }
 
 export { generateFileName, validateFile, formatFileSize }
