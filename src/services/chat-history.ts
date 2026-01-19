@@ -2,6 +2,7 @@ import { BotId } from '~app/bots'
 import { MessageModel, ConversationModel } from '~types'
 import { conversationsService, messagesService } from '~db/services'
 import { getCurrentUserId } from '~db/utils/helpers'
+import { generateConversationTitle, getFallbackTitle } from '~services/title-generator'
 
 async function loadHistoryConversations(botId: BotId): Promise<ConversationModel[] | null> {
   const userId = await getCurrentUserId()
@@ -21,6 +22,9 @@ async function loadConversationMessages(botId: BotId, cid: string): Promise<Mess
 }
 
 export async function setConversationMessages(botId: BotId, cid: string, messages: MessageModel[]) {
+
+  console.log('messages：', messages)
+
   const userId = await getCurrentUserId()
   if (!userId) {
     return
@@ -29,14 +33,30 @@ export async function setConversationMessages(botId: BotId, cid: string, message
   const existingConversation = conversations?.find((c) => c.id === cid) || null
 
   if (!existingConversation) {
+    const message = messages[0]
+
+    const initialTitle = getFallbackTitle(message.text)
+
+    console.log('initialTitle', initialTitle)
+
     await conversationsService.createConversation({
       id: cid,
       botId,
       userId,
-      title: null,
+      title: initialTitle,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
+
+    generateConversationTitle({ userMessage: message.text })
+      .then(generatedTitle => {
+        if (generatedTitle && generatedTitle !== initialTitle) {
+          conversationsService.updateConversation(cid, { title: generatedTitle })
+        }
+      })
+      .catch(error => {
+        throw new Error('Failed to generate conversation title')
+      })
   } else {
     await conversationsService.updateConversation(cid, {
       updatedAt: new Date().toISOString(),
