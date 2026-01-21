@@ -69,10 +69,6 @@ export function useChat(botId: BotId) {
         updateMessage(botMessageId, (message) => {
           message.error = error
         })
-        setChatState((draft) => {
-          draft.abortController = undefined
-          draft.generatingMessageId = ''
-        })
       }
 
       setChatState((draft) => {
@@ -108,10 +104,10 @@ export function useChat(botId: BotId) {
   }, [chatState.abortController, chatState.generatingMessageId, setChatState, updateMessage])
 
   useEffect(() => {
-    if (chatState.messages.length) {
+    if (chatState.messages.length && !chatState.generatingMessageId) {
       setConversationMessages(botId, chatState.conversationId, chatState.messages)
     }
-  }, [botId, chatState.conversationId, chatState.messages])
+  }, [chatState.generatingMessageId])
 
   const chat = useMemo(
     () => ({

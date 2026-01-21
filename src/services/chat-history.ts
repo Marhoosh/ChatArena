@@ -33,7 +33,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
       id: cid,
       botId,
       userId,
-      title: null,
+      title: messages[0].text,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })

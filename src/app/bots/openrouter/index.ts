@@ -52,7 +52,6 @@ export class OpenRouterBot extends AbstractBot {
     }
 
     await parseSSEResponse(resp, (message) => {
-      console.debug('openrouter sse message', message)
       if (message === '[DONE]') {
         finish()
         return
@@ -81,6 +80,7 @@ export class OpenRouterBot extends AbstractBot {
     }
   }
 
+  //TODO：这里不能暴露apiKey，使用supabase的edge functions来代理
   async fetchCompletionApi(messages: ChatMessage[], signal?: AbortSignal): Promise<Response> {
     return fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
