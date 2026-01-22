@@ -8,6 +8,7 @@ import { MessageModel } from '~types'
 import { uuid } from '~utils'
 import { ChatError } from '~utils/errors'
 import { BotId } from '../bots'
+import * as Sentry from '@sentry/browser'
 
 export function useChat(botId: BotId) {
   const chatAtom = useMemo(() => chatFamily({ botId, page: 'singleton' }), [botId])
@@ -65,7 +66,7 @@ export function useChat(botId: BotId) {
           abortController.abort()
         }
         const error = err as ChatError
-        console.error('sendMessage error', error.code, error)
+        Sentry.captureException(error)
         updateMessage(botMessageId, (message) => {
           message.error = error
         })
