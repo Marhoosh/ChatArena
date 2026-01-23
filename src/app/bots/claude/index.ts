@@ -23,9 +23,6 @@ export class ClaudeBot extends AsyncAbstractBot {
       return new ClaudeWebBot()
     }
     if (claudeMode === ClaudeMode.OpenRouter) {
-      if (!config.openrouterApiKey) {
-        throw new ChatError('OpenRouter API key not set', ErrorCode.API_KEY_NOT_SET)
-      }
       const model = `anthropic/${config.openrouterClaudeModel}`
       return new OpenRouterBot({ apiKey: config.openrouterApiKey, model })
     }

@@ -189,6 +189,8 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     return <p className="ml-2 text-secondary-text text-sm">{t('This is a limitation set by poe.com')}</p>
   }
 
+  // TODO: 新加入的一些chat error类型也要在此添加判断
+
   return null
 }
 

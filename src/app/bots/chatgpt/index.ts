@@ -37,9 +37,6 @@ export class ChatGPTBot extends AsyncAbstractBot {
       return new PoeWebBot(config.chatgptPoeModelName)
     }
     if (chatgptMode === ChatGPTMode.OpenRouter) {
-      if (!config.openrouterApiKey) {
-        throw new ChatError('OpenRouter API key not set', ErrorCode.API_KEY_NOT_SET)
-      }
       const model = `openai/${config.openrouterOpenAIModel}`
       return new OpenRouterBot({ apiKey: config.openrouterApiKey, model })
     }

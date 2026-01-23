@@ -2,6 +2,8 @@ import { requestHostPermission } from '~app/utils/permissions'
 import { ChatError, ErrorCode } from '~utils/errors'
 import { parseSSEResponse } from '~utils/sse'
 import { AbstractBot, SendMessageParams } from '../abstract-bot'
+import { supabase } from '~db/client'
+import { SUPABASE_URL } from "~app/config";
 
 interface ChatMessage {
   role: 'system' | 'assistant' | 'user'
@@ -80,23 +82,47 @@ export class OpenRouterBot extends AbstractBot {
     }
   }
 
-  //TODO：这里不能暴露apiKey，使用supabase的edge functions来代理
   async fetchCompletionApi(messages: ChatMessage[], signal?: AbortSignal): Promise<Response> {
-    return fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      signal,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.config.apiKey}`,
-        'HTTP-Referer': 'https://chathub.gg',
-        'X-Title': 'ChatHub',
-      },
-      body: JSON.stringify({
-        model: this.config.model,
-        messages,
-        stream: true,
-      }),
-    })
+
+
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
+      throw new ChatError('Not authenticated', ErrorCode.UNAUTHORIZED)
+    }
+
+    // TODO：此处edge function的url需要从config中读取
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/ai-proxy`,
+      {
+        method: 'POST',
+        signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          messages,
+          model: this.config.model,
+          stream: true,
+        }),
+      }
+    )
+
+    // TODO：此处的错误的捕获和处理？
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+      if (response.status === 429) {
+        throw new ChatError('Daily limit exceeded', ErrorCode.QUOTA_EXCEEDED)
+      }
+      if (response.status === 401) {
+        throw new ChatError('Unauthorized', ErrorCode.UNAUTHORIZED)
+      }
+      throw new ChatError(errorData.error || 'OpenRouter API error', ErrorCode.API_ERROR)
+    }
+
+    return response
   }
 
   resetConversation() {

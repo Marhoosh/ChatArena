@@ -67,6 +67,8 @@ export function useChat(botId: BotId) {
         }
         const error = err as ChatError
         Sentry.captureException(error)
+
+        // TODO：聊天过程中发生错误时，历史聊天记录如何处理？目前有个bug，发生错误的时候，数据库中存储的conversation中的title为空
         updateMessage(botMessageId, (message) => {
           message.error = error
         })
