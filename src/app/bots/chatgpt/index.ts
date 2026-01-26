@@ -1,53 +1,16 @@
-import { ChatGPTMode, getUserConfig } from '~/services/user-config'
+import { BOT_DEFAULT_CONFIG, OPENROUTER_API_KEY } from '~/app/config'
 import * as agent from '~services/agent'
-import { ChatError, ErrorCode } from '~utils/errors'
 import { AsyncAbstractBot, MessageParams } from '../abstract-bot'
-import { ChatGPTApiBot } from '../chatgpt-api'
-import { ChatGPTAzureApiBot } from '../chatgpt-azure'
-import { ChatGPTWebBot } from '../chatgpt-webapp'
-import { PoeWebBot } from '../poe'
 import { OpenRouterBot } from '../openrouter'
 
 export class ChatGPTBot extends AsyncAbstractBot {
   async initializeBot() {
-    const { chatgptMode, ...config } = await getUserConfig()
-    if (chatgptMode === ChatGPTMode.API) {
-      if (!config.openaiApiKey) {
-        throw new ChatError('OpenAI API key not set', ErrorCode.API_KEY_NOT_SET)
-      }
-      return new ChatGPTApiBot({
-        openaiApiKey: config.openaiApiKey,
-        openaiApiHost: config.openaiApiHost,
-        chatgptApiModel: config.chatgptApiModel,
-        chatgptApiTemperature: config.chatgptApiTemperature,
-        chatgptApiSystemMessage: config.chatgptApiSystemMessage,
-      })
-    }
-    if (chatgptMode === ChatGPTMode.Azure) {
-      if (!config.azureOpenAIApiInstanceName || !config.azureOpenAIApiDeploymentName || !config.azureOpenAIApiKey) {
-        throw new Error('Please check your Azure OpenAI API configuration')
-      }
-      return new ChatGPTAzureApiBot({
-        azureOpenAIApiKey: config.azureOpenAIApiKey,
-        azureOpenAIApiDeploymentName: config.azureOpenAIApiDeploymentName,
-        azureOpenAIApiInstanceName: config.azureOpenAIApiInstanceName,
-      })
-    }
-    if (chatgptMode === ChatGPTMode.Poe) {
-      return new PoeWebBot(config.chatgptPoeModelName)
-    }
-    if (chatgptMode === ChatGPTMode.OpenRouter) {
-      const model = `openai/${config.openrouterOpenAIModel}`
-      return new OpenRouterBot({ apiKey: config.openrouterApiKey, model })
-    }
-    return new ChatGPTWebBot(config.chatgptWebappModelName)
-  }
-
-  async sendMessage(params: MessageParams) {
-    const { chatgptWebAccess } = await getUserConfig()
-    if (chatgptWebAccess) {
-      return agent.execute(params.prompt, (prompt) => this.doSendMessageGenerator({ ...params, prompt }), params.signal)
-    }
-    return this.doSendMessageGenerator(params)
+    const config = BOT_DEFAULT_CONFIG.chatgpt
+    const defaultModel = config.models[0]
+    
+    return new OpenRouterBot({
+      apiKey: OPENROUTER_API_KEY,
+      model: defaultModel,
+    })
   }
 }

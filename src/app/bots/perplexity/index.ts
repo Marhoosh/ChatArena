@@ -1,17 +1,15 @@
-import { PerplexityMode, getUserConfig } from '~/services/user-config'
+import { BOT_DEFAULT_CONFIG, OPENROUTER_API_KEY } from '~/app/config'
 import { AsyncAbstractBot } from '../abstract-bot'
-import { PerplexityApiBot } from '../perplexity-api'
-import { PerplexityLabsBot } from '../perplexity-web'
+import { OpenRouterBot } from '../openrouter'
 
 export class PerplexityBot extends AsyncAbstractBot {
   async initializeBot() {
-    const { perplexityMode, ...config } = await getUserConfig()
-    if (perplexityMode === PerplexityMode.API) {
-      if (!config.perplexityApiKey) {
-        throw new Error('Perplexity API key missing')
-      }
-      return new PerplexityApiBot(config.perplexityApiKey, 'pplx-70b-online')
-    }
-    return new PerplexityLabsBot('pplx-70b-online')
+    const config = BOT_DEFAULT_CONFIG.perplexity
+    const defaultModel = config.models[0]
+    
+    return new OpenRouterBot({
+      apiKey: OPENROUTER_API_KEY,
+      model: defaultModel,
+    })
   }
 }

@@ -110,7 +110,7 @@ export class OpenRouterBot extends AbstractBot {
       }
     )
 
-    // TODO：此处的错误的捕获和处理？
+    // TODO：此处的错误的捕获和处理？这里直接这样的话，Sentry捕获不到错误的详情
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
       if (response.status === 429) {

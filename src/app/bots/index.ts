@@ -12,6 +12,7 @@ import { PiBot } from './pi'
 import { QianwenWebBot } from './qianwen'
 import { XunfeiBot } from './xunfei'
 
+// TODO: 说实话，应该方便扩展机器人，因为后面会有更多的机器人和模型出来
 export type BotId =
   | 'chatgpt'
   | 'bing'

@@ -1,13 +1,12 @@
 import useSWR from 'swr/immutable'
 import { BotId } from '~app/bots'
 import { CHATBOTS } from '~app/consts'
-import { getUserConfig } from '~services/user-config'
+import { ENABLED_BOTS } from '~app/config'
 
 export function useEnabledBots() {
   const query = useSWR('enabled-bots', async () => {
-    const { enabledBots } = await getUserConfig()
-    return Object.keys(CHATBOTS)
-      .filter((botId) => enabledBots.includes(botId as BotId))
+    return ENABLED_BOTS
+      .filter((botId) => CHATBOTS[botId as BotId])
       .map((botId) => {
         const bid = botId as BotId
         return { botId: bid, bot: CHATBOTS[bid] }
